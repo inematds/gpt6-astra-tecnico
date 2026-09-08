@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="inema-course" content="gpt6astratec">
+  <title>Trilha 1 — Setup e operação | GPT-6 Astra: operação técnica</title>
+  <meta name="description" content="O que o Astra muda no loop de trabalho, como ativar nas três superfícies (app, Codex, CLI), computer use no navegador com rascunho e verificação, e o ciclo codar/iterar/rollback num projeto real.">
+
+  <!-- ANTI-FOUC: bloqueante, antes de tudo -->
+  <script>
+(function () {
+  try {
+    var html = document.documentElement;
+    var DEF = { theme: 'inema-dark', font: 'inter', fontScale: 100, lineWidth: 68, leading: 1.7, accent: 'emerald' };
+    function clone(o) { var r = {}; for (var x in o) r[x] = o[x]; return r; }
+    var p = clone(DEF);
+    try {
+      var raw = localStorage.getItem('inema.prefs');
+      if (raw) { var parsed = JSON.parse(raw); if (parsed && typeof parsed === 'object') { for (var k in DEF) if (parsed[k] != null) p[k] = parsed[k]; } }
+      else { var legacy = localStorage.getItem('theme'); if (legacy === 'light') p.theme = 'claro'; else if (legacy === 'dark') p.theme = 'inema-dark'; }
+    } catch (e) { p = clone(DEF); }
+    var THEMES = { 'inema-dark': { dark: true, attr: null, cs: 'dark' }, 'claro': { dark: false, attr: null, cs: 'light' }, 'sepia': { dark: false, attr: 'sepia', cs: 'light' }, 'foco': { dark: null, attr: 'foco', cs: null }, 'contraste': { dark: true, attr: 'contraste', cs: 'dark' } };
+    var t = THEMES[p.theme] || THEMES['inema-dark'];
+    if (t.dark === true) html.classList.add('dark'); else if (t.dark === false) html.classList.remove('dark');
+    if (t.attr) html.setAttribute('data-theme', t.attr); else html.removeAttribute('data-theme');
+    html.style.colorScheme = (t.cs ? t.cs : (html.classList.contains('dark') ? 'dark' : 'light'));
+    html.setAttribute('data-font', p.font || 'inter'); html.setAttribute('data-accent', p.accent || 'emerald');
+    var s = html.style; var scale = (+p.fontScale || 100);
+    s.setProperty('--inema-font-scale', (scale / 100).toString()); s.setProperty('font-size', scale + '%');
+    s.setProperty('--measure', (+p.lineWidth || 68) + 'ch'); s.setProperty('--lh-body', (+p.leading || 1.7).toString());
+    var fam = p.font === 'system' ? 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif' : (p.font === 'leitura' ? '"Atkinson Hyperlegible", "Inter", system-ui, sans-serif' : '"Inter", system-ui, sans-serif');
+    s.setProperty('--font-body', fam);
+    var ACC = { emerald: [152, 76, 45], blue: [217, 91, 60], purple: [258, 90, 66], amber: [38, 92, 50], teal: [174, 72, 41], rose: [350, 89, 60] };
+    var a = ACC[p.accent] || ACC.emerald;
+    s.setProperty('--accent-h', a[0] + ''); s.setProperty('--accent-s', a[1] + '%'); s.setProperty('--accent-l', a[2] + '%');
+    s.setProperty('--accent', 'hsl(' + a[0] + ' ' + a[1] + '% ' + a[2] + '%)');
+  } catch (err) { try { document.documentElement.classList.add('dark'); document.documentElement.style.colorScheme = 'dark'; } catch (e) {} }
+})();
+</script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class', theme: { extend: { colors: { primary: '#FACC15', dark: { 900: '#111827', 800: '#1f2937', 700: '#374151', 600: '#4b5563' } } } } }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/learn.css">
+
+  <!-- Manifesto do curso (obrigatório em toda página) -->
+  <script type="application/json" data-inema-manifest>
+{
+ "course": "gpt6astratec",
+ "tracks": [
+  {
+   "n": "1",
+   "title": "Setup e operação",
+   "modules": [
+    {
+     "id": "1-1",
+     "title": "O que o Astra muda no loop de trabalho",
+     "topics": 6,
+     "href": "curso/trilha1/modulo-1-1.html"
+    },
+    {
+     "id": "1-2",
+     "title": "Ativando: app, Codex e CLI",
+     "topics": 6,
+     "href": "curso/trilha1/modulo-1-2.html"
+    },
+    {
+     "id": "1-3",
+     "title": "Computer use no navegador",
+     "topics": 6,
+     "href": "curso/trilha1/modulo-1-3.html"
+    },
+    {
+     "id": "1-4",
+     "title": "Codar com o Astra: trocar, refatorar, rollback",
+     "topics": 6,
+     "href": "curso/trilha1/modulo-1-4.html"
+    }
+   ]
+  },
+  {
+   "n": "2",
+   "title": "Construir e escalar",
+   "modules": [
+    {
+     "id": "2-1",
+     "title": "Skills: ensinar a ferramenta e o gosto",
+     "topics": 6,
+     "href": "curso/trilha2/modulo-2-1.html"
+    },
+    {
+     "id": "2-2",
+     "title": "MCP e trabalhos longos",
+     "topics": 6,
+     "href": "curso/trilha2/modulo-2-2.html"
+    },
+    {
+     "id": "2-3",
+     "title": "Cota, custo e orquestração",
+     "topics": 6,
+     "href": "curso/trilha2/modulo-2-3.html"
+    },
+    {
+     "id": "2-4",
+     "title": "Memória compartilhada e o sistema completo",
+     "topics": 6,
+     "href": "curso/trilha2/modulo-2-4.html"
+    }
+   ]
+  }
+ ]
+}
+  </script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .dark body { background-color: #111827; }
+    .topic-explanation { display: none; }
+    .topic-explanation.active { display: block; }
+    html { scroll-behavior: smooth; }
+    [id] { scroll-margin-top: 5rem; }
+
+    /* Light mode overrides */
+    html:not(.dark) body { background-color: #f8fafc; }
+    html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+    html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+    html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+    html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+    html:not(.dark) .bg-dark-800\/50, html:not(.dark) .bg-dark-800\/60, html:not(.dark) .bg-dark-900\/40, html:not(.dark) .bg-dark-900\/60 { background-color: #f3f4f6; }
+    html:not(.dark) .text-neutral-100 { color: #111827; }
+    html:not(.dark) .text-white { color: #111827; }
+    html:not(.dark) .text-neutral-300 { color: #4b5563; }
+    html:not(.dark) .text-neutral-400 { color: #6b7280; }
+    html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+    html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+    html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+    
+    html:not(.dark) .text-emerald-400 { color: #059669; }
+    html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5, 150, 105, 0.12); }
+    html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5, 150, 105, 0.08); }
+    html:not(.dark) .bg-emerald-900\/20 { background-color: rgba(5, 150, 105, 0.07); }
+    html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5, 150, 105, 0.25); }
+    html:not(.dark) .hover\:bg-emerald-500\/30:hover { background-color: rgba(5, 150, 105, 0.18); }
+    html:not(.dark) .hover\:text-emerald-400:hover { color: #059669; }
+    html:not(.dark) .hover\:bg-emerald-500\/10:hover { background-color: rgba(5, 150, 105, 0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-emerald-400 { color: #059669; }
+
+    html:not(.dark) .text-blue-400 { color: #2563eb; }
+    html:not(.dark) .bg-blue-500\/20 { background-color: rgba(37, 99, 235, 0.12); }
+    html:not(.dark) .bg-blue-500\/10 { background-color: rgba(37, 99, 235, 0.08); }
+    html:not(.dark) .bg-blue-900\/20 { background-color: rgba(37, 99, 235, 0.07); }
+    html:not(.dark) .border-blue-500\/30 { border-color: rgba(37, 99, 235, 0.25); }
+    html:not(.dark) .hover\:bg-blue-500\/30:hover { background-color: rgba(37, 99, 235, 0.18); }
+    html:not(.dark) .hover\:text-blue-400:hover { color: #2563eb; }
+    html:not(.dark) .hover\:bg-blue-500\/10:hover { background-color: rgba(37, 99, 235, 0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-blue-400 { color: #2563eb; }
+
+    html:not(.dark) .text-purple-400 { color: #7c3aed; }
+    html:not(.dark) .bg-purple-500\/20 { background-color: rgba(124, 58, 237, 0.12); }
+    html:not(.dark) .bg-purple-500\/10 { background-color: rgba(124, 58, 237, 0.08); }
+    html:not(.dark) .bg-purple-900\/20 { background-color: rgba(124, 58, 237, 0.07); }
+    html:not(.dark) .border-purple-500\/30 { border-color: rgba(124, 58, 237, 0.25); }
+    html:not(.dark) .hover\:bg-purple-500\/30:hover { background-color: rgba(124, 58, 237, 0.18); }
+    html:not(.dark) .hover\:text-purple-400:hover { color: #7c3aed; }
+    html:not(.dark) .hover\:bg-purple-500\/10:hover { background-color: rgba(124, 58, 237, 0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-purple-400 { color: #7c3aed; }
+
+    html:not(.dark) .text-amber-400 { color: #92400e; }
+    html:not(.dark) .bg-amber-500\/20 { background-color: rgba(146, 64, 14, 0.12); }
+    html:not(.dark) .bg-amber-500\/10 { background-color: rgba(146, 64, 14, 0.08); }
+    html:not(.dark) .bg-amber-900\/20 { background-color: rgba(146, 64, 14, 0.07); }
+    html:not(.dark) .border-amber-500\/30 { border-color: rgba(146, 64, 14, 0.25); }
+    html:not(.dark) .hover\:bg-amber-500\/30:hover { background-color: rgba(146, 64, 14, 0.18); }
+    html:not(.dark) .hover\:text-amber-400:hover { color: #92400e; }
+    html:not(.dark) .hover\:bg-amber-500\/10:hover { background-color: rgba(146, 64, 14, 0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-amber-400 { color: #92400e; }
+
+    html:not(.dark) .text-red-400 { color: #b91c1c; }
+    html:not(.dark) .bg-red-500\/20 { background-color: rgba(185, 28, 28, 0.12); }
+    html:not(.dark) .bg-red-500\/10 { background-color: rgba(185, 28, 28, 0.08); }
+    html:not(.dark) .bg-red-900\/20 { background-color: rgba(185, 28, 28, 0.07); }
+    html:not(.dark) .border-red-500\/30 { border-color: rgba(185, 28, 28, 0.25); }
+    html:not(.dark) .hover\:bg-red-500\/30:hover { background-color: rgba(185, 28, 28, 0.18); }
+    html:not(.dark) .hover\:text-red-400:hover { color: #b91c1c; }
+    html:not(.dark) .hover\:bg-red-500\/10:hover { background-color: rgba(185, 28, 28, 0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-red-400 { color: #b91c1c; }
+    html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+    html:not(.dark) .text-primary { color: #a16207; }
+    html:not(.dark) .bg-primary\/10 { background-color: rgba(161, 98, 7, 0.08); }
+    html:not(.dark) .border-primary\/30 { border-color: rgba(161, 98, 7, 0.25); }
+    html:not(.dark) .text-sky-400 { color: #0369a1; }
+    html:not(.dark) .text-yellow-400 { color: #a16207; }
+    html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+    html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+    html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95); }
+    html:not(.dark) .text-amber-700 { color: #92400e; }
+
+    /* Dark mode - bordas suaves */
+    .dark .border-dark-600 { border-color: #374151; }
+    .dark .divide-dark-600 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+
+    /* SVG */
+    html:not(.dark) svg[role="img"] { filter: saturate(0.82) brightness(0.96); }
+    @keyframes wf-pulse { 0%,100% { opacity:.55 } 50% { opacity:1 } }
+    @keyframes wf-flow { to { stroke-dashoffset: -28; } }
+    @media (prefers-reduced-motion: no-preference) {
+      .wf-a { animation: wf-pulse 2.6s ease-in-out infinite; }
+      .wf-a:nth-child(2){animation-delay:.25s} .wf-a:nth-child(3){animation-delay:.5s}
+      .wf-a:nth-child(4){animation-delay:.75s} .wf-a:nth-child(5){animation-delay:1s} .wf-a:nth-child(6){animation-delay:1.25s}
+      .wf-flow { stroke-dasharray: 6 8; animation: wf-flow 1.4s linear infinite; }
+    }
+
+    /* Quiz */
+    .qz-opt[data-state="ok"] { border-color: #10b981; background: rgba(16,185,129,.15); }
+    .qz-opt[data-state="no"] { border-color: #ef4444; background: rgba(239,68,68,.12); }
+    .qz-fb { display:none; } .qz[data-answered] .qz-fb { display:block; }
+
+    /* TOC do módulo é um bloco inline, não uma barra lateral sticky */
+    [data-inema-toc] { position: static !important; top: auto !important; max-height: none !important; }
+    /* Painel de aparência (classes internas) */
+    .inema-appearance-sec { margin-bottom: .75rem; }
+    .inema-appearance-label { font-size: .7rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #9ca3af; margin-bottom: .35rem; }
+    .inema-appearance-row { display: flex; flex-wrap: wrap; gap: .35rem; }
+    .inema-chip { font-size: .8rem; padding: .3rem .65rem; border-radius: .5rem; border: 1px solid #374151; background: rgba(31,41,55,.6); color: #e5e7eb; cursor: pointer; }
+    .inema-chip:hover { border-color: #FACC15; }
+    .inema-chip[aria-pressed="true"], .inema-chip.is-active { background: rgba(250,204,21,.15); border-color: #FACC15; color: #FACC15; }
+    html:not(.dark) .inema-chip { background: #f3f4f6; color: #111827; border-color: #d1d5db; }
+    html:not(.dark) .inema-chip[aria-pressed="true"], html:not(.dark) .inema-chip.is-active { background: rgba(161,98,7,.1); border-color: #a16207; color: #a16207; }
+    /* Code box */
+    .codebox pre { white-space: pre-wrap; word-break: break-word; }
+    
+  </style>
+</head>
+<body class="bg-dark-900 text-neutral-100 min-h-screen">
+
+  <!-- NAVIGATION -->
+  <nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-14">
+        <div class="flex items-center space-x-3">
+          <a href="../../index.html" class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300">
+            <span class="text-2xl">⚙️</span>
+            <span class="font-bold text-lg hidden md:inline">Astra técnico</span>
+          </a>
+          <span class="text-neutral-600">|</span>
+          <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300 text-sm font-medium">INEMA.CLUB</a>
+          <span class="text-neutral-600 hidden sm:inline">-</span>
+          <a href="https://inema.pro" target="_blank" class="text-amber-700 dark:text-slate-300 hover:opacity-80 text-sm font-medium hidden sm:inline">PRO</a>
+        </div>
+        <div class="flex items-center space-x-1 sm:space-x-2">
+          <a href="../../curso/trilha1/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-emerald-400 bg-emerald-500/10">
+            <span class="sm:hidden">T1</span>
+            <span class="hidden sm:inline">Setup</span>
+          </a>
+          <a href="../../curso/trilha2/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors">
+            <span class="sm:hidden">T2</span>
+            <span class="hidden sm:inline">Escalar</span>
+          </a>
+          <button type="button" data-inema-journey-open class="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-primary bg-primary/10 hover:bg-primary/20 transition-colors">
+            <span>🧭</span><span>Minha jornada</span>
+            <span data-inema-journey-badge class="text-xs px-1.5 py-0.5 rounded-full bg-primary/20"></span>
+          </button>
+          <button type="button" data-inema-appearance-toggle="[data-inema-appearance]" aria-expanded="false" class="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" title="Aparência e leitura">
+            <span aria-hidden="true">Aa</span>
+          </button>
+          <button id="theme-toggle" class="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" title="Tema claro/escuro">
+            <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+            <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+  
+  <div data-inema-appearance class="inema-appearance-pop" role="region" aria-label="Aparência e leitura">
+    <div class="inema-appearance-sec">
+      <p class="inema-appearance-label">Tema</p>
+      <div class="inema-appearance-row">
+        <button type="button" data-inema-set-theme="inema-dark" class="inema-chip">Escuro</button>
+        <button type="button" data-inema-set-theme="claro" class="inema-chip">Claro</button>
+        <button type="button" data-inema-set-theme="sepia" class="inema-chip">Sépia</button>
+        <button type="button" data-inema-set-theme="foco" class="inema-chip">Foco</button>
+        <button type="button" data-inema-set-theme="contraste" class="inema-chip">Contraste</button>
+      </div>
+    </div>
+    <div class="inema-appearance-sec">
+      <p class="inema-appearance-label">Tamanho do texto</p>
+      <div class="inema-appearance-row">
+        <button type="button" data-inema-set-fontscale="90" class="inema-chip">A-</button>
+        <button type="button" data-inema-set-fontscale="100" class="inema-chip">A</button>
+        <button type="button" data-inema-set-fontscale="115" class="inema-chip">A+</button>
+        <button type="button" data-inema-set-fontscale="130" class="inema-chip">A++</button>
+      </div>
+    </div>
+    <div class="inema-appearance-sec">
+      <p class="inema-appearance-label">Fonte</p>
+      <div class="inema-appearance-row">
+        <button type="button" data-inema-set-font="inter" class="inema-chip">Inter</button>
+        <button type="button" data-inema-set-font="system" class="inema-chip">Sistema</button>
+        <button type="button" data-inema-set-font="leitura" class="inema-chip">Leitura</button>
+      </div>
+    </div>
+    <div class="inema-appearance-sec">
+      <p class="inema-appearance-label">Entrelinha</p>
+      <div class="inema-appearance-row">
+        <button type="button" data-inema-set-leading="1.5" class="inema-chip">Compacta</button>
+        <button type="button" data-inema-set-leading="1.7" class="inema-chip">Normal</button>
+        <button type="button" data-inema-set-leading="1.9" class="inema-chip">Ampla</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div class="flex items-center space-x-2 text-sm text-neutral-400"><a href="../../index.html" class="hover:text-emerald-400">Início</a><span>/</span><span class="text-emerald-400">Trilha 1</span></div>
+  </nav>
+
+  <header class="bg-gradient-to-br from-emerald-900/30 via-dark-800 to-dark-800 py-12 border-b border-dark-600" data-inema-track="1">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+        <div>
+          <span class="inline-block px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-semibold rounded-full mb-4 uppercase tracking-wider">Trilha 1</span>
+          <h1 class="text-3xl sm:text-4xl font-bold mb-4 text-neutral-100">🧭 Setup e operação</h1>
+          <p class="text-neutral-300 text-lg mb-6">O que o Astra muda no loop de trabalho, como ativar nas três superfícies (app, Codex, CLI), computer use no navegador com rascunho e verificação, e o ciclo codar/iterar/rollback num projeto real.</p>
+          <div class="grid grid-cols-3 gap-4 mb-6">
+            <div class="bg-dark-800 rounded-xl p-4 border border-dark-600 text-center"><div class="text-2xl font-bold text-emerald-400">4</div><div class="text-xs text-neutral-500 mt-1">Módulos</div></div><div class="bg-dark-800 rounded-xl p-4 border border-dark-600 text-center"><div class="text-2xl font-bold text-emerald-400">24</div><div class="text-xs text-neutral-500 mt-1">Tópicos</div></div><div class="bg-dark-800 rounded-xl p-4 border border-dark-600 text-center"><div class="text-2xl font-bold text-emerald-400">~2.7h</div><div class="text-xs text-neutral-500 mt-1">Duração</div></div>
+          </div>
+          <div data-inema-meter="trilha:1" class="inema-meter bg-dark-800 rounded-xl p-4 border border-dark-600" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Progresso da trilha 1">
+            <div class="flex justify-between text-sm text-neutral-400 mb-2"><span>Seu progresso</span><span class="text-emerald-400 font-semibold" data-inema-meter-pct>0%</span></div>
+            <div class="inema-bar h-2 bg-dark-700 rounded-full overflow-hidden mb-2"><div class="inema-bar__fill h-full bg-emerald-500 rounded-full transition-all" data-inema-meter-fill style="width:0%"></div></div>
+            <div class="text-xs text-neutral-500"><span data-inema-meter-frac>0 de 24</span> tópicos concluídos</div>
+          </div>
+        </div>
+        <div class="rounded-2xl border border-emerald-500/30 bg-dark-900/40 p-4"><svg viewBox="0 0 800 328" class="w-full h-auto" role="img" aria-label="Diagrama dos 4 módulos da trilha 1: Setup e operação"><defs>
+    <linearGradient id="s11-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#10b981"/></linearGradient>
+    <filter id="s11-glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="1.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <pattern id="s11-grid" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="1.3" cy="1.3" r="1.3" fill="#10b981" opacity="0.14"/></pattern>
+  </defs><rect width="800" height="328" fill="url(#s11-grid)"/>
+      <g filter="url(#s11-glow)"><circle cx="130" cy="164" r="88" fill="#064e3b" stroke="url(#s11-g)" stroke-width="2.5"/></g>
+      <text x="130" y="156" text-anchor="middle" fill="#34d399" font-family="Inter,sans-serif" font-size="15" font-weight="800">Trilha 1</text><text x="130" y="174" text-anchor="middle" fill="#34d399" font-family="Inter,sans-serif" font-size="15" font-weight="800">Setup</text><text x="130" y="192" text-anchor="middle" fill="#34d399" font-family="Inter,sans-serif" font-size="15" font-weight="800">24 tópicos</text><path d="M220 164 C 255 164, 255 56, 380 56" fill="none" stroke="#10b981" stroke-width="1.6" stroke-dasharray="5 5" opacity="0.6"/>
+        <g class="wf-a"><rect x="380" y="32" width="400" height="48" rx="10" fill="#064e3b" stroke="#10b981" stroke-width="1.6"/>
+        <text x="420" y="62" text-anchor="middle" fill="#34d399" font-family="Inter,sans-serif" font-size="18" font-weight="800">+6</text>
+        <text x="454" y="53" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="11.5" font-weight="600">1.1 O que o Astra muda no loop de trabalho</text>
+        <text x="454" y="69" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5">Delegar a tarefa, não o passo</text></g><path d="M220 164 C 255 164, 255 128, 380 128" fill="none" stroke="#38bdf8" stroke-width="1.6" stroke-dasharray="5 5" opacity="0.6"/>
+        <g class="wf-a"><rect x="380" y="104" width="400" height="48" rx="10" fill="#0e1b26" stroke="#38bdf8" stroke-width="1.6"/>
+        <text x="420" y="134" text-anchor="middle" fill="#38bdf8" font-family="Inter,sans-serif" font-size="18" font-weight="800">+6</text>
+        <text x="454" y="125" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="11.5" font-weight="600">1.2 Ativando: app, Codex e CLI</text>
+        <text x="454" y="141" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5">Modelo certo nas três superfícies, com prova</text></g><path d="M220 164 C 255 164, 255 200, 380 200" fill="none" stroke="#10b981" stroke-width="1.6" stroke-dasharray="5 5" opacity="0.6"/>
+        <g class="wf-a"><rect x="380" y="176" width="400" height="48" rx="10" fill="#064e3b" stroke="#10b981" stroke-width="1.6"/>
+        <text x="420" y="206" text-anchor="middle" fill="#34d399" font-family="Inter,sans-serif" font-size="18" font-weight="800">+6</text>
+        <text x="454" y="197" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="11.5" font-weight="600">1.3 Computer use no navegador</text>
+        <text x="454" y="213" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5">Extensão ligada, rascunho primeiro, prova no fim</text></g><path d="M220 164 C 255 164, 255 272, 380 272" fill="none" stroke="#38bdf8" stroke-width="1.6" stroke-dasharray="5 5" opacity="0.6"/>
+        <g class="wf-a"><rect x="380" y="248" width="400" height="48" rx="10" fill="#0e1b26" stroke="#38bdf8" stroke-width="1.6"/>
+        <text x="420" y="278" text-anchor="middle" fill="#38bdf8" font-family="Inter,sans-serif" font-size="18" font-weight="800">+6</text>
+        <text x="454" y="269" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="11.5" font-weight="600">1.4 Codar com o Astra: trocar, refatorar, rollb…</text>
+        <text x="454" y="285" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5">Fork, mudança, prova, git</text></g></svg></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold mb-6">Mapa da trilha</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <a href="#modulo-1-1" class="group bg-dark-800 rounded-xl border border-dark-600 hover:border-emerald-500/30 p-5 transition-all">
+          <div class="flex items-center justify-between mb-3"><span class="text-emerald-400 font-bold text-sm">1.1</span><span class="text-neutral-500 text-xs">~35 min</span></div>
+          <h3 class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors mb-1">🔁 O que o Astra muda no loop de trabalho</h3>
+          <p class="text-xs text-neutral-500">Delegar a tarefa, não o passo</p>
+        </a>
+        <a href="#modulo-1-2" class="group bg-dark-800 rounded-xl border border-dark-600 hover:border-emerald-500/30 p-5 transition-all">
+          <div class="flex items-center justify-between mb-3"><span class="text-emerald-400 font-bold text-sm">1.2</span><span class="text-neutral-500 text-xs">~40 min</span></div>
+          <h3 class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors mb-1">🔌 Ativando: app, Codex e CLI</h3>
+          <p class="text-xs text-neutral-500">Modelo certo nas três superfícies, com prova</p>
+        </a>
+        <a href="#modulo-1-3" class="group bg-dark-800 rounded-xl border border-dark-600 hover:border-emerald-500/30 p-5 transition-all">
+          <div class="flex items-center justify-between mb-3"><span class="text-emerald-400 font-bold text-sm">1.3</span><span class="text-neutral-500 text-xs">~40 min</span></div>
+          <h3 class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors mb-1">🖱️ Computer use no navegador</h3>
+          <p class="text-xs text-neutral-500">Extensão ligada, rascunho primeiro, prova no fim</p>
+        </a>
+        <a href="#modulo-1-4" class="group bg-dark-800 rounded-xl border border-dark-600 hover:border-emerald-500/30 p-5 transition-all">
+          <div class="flex items-center justify-between mb-3"><span class="text-emerald-400 font-bold text-sm">1.4</span><span class="text-neutral-500 text-xs">~45 min</span></div>
+          <h3 class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors mb-1">🧑‍💻 Codar com o Astra: trocar, refatorar, rollback</h3>
+          <p class="text-xs text-neutral-500">Fork, mudança, prova, git</p>
+        </a></div>
+    </section>
+
+    <h2 class="text-2xl font-bold mb-6">Conteúdo detalhado</h2>
+
+    <div id="modulo-1-1" class="bg-dark-800 rounded-2xl border border-dark-600 mb-8 overflow-hidden scroll-mt-20" data-inema-module="1-1">
+      <div class="p-6 border-b border-dark-600">
+        <div class="flex items-start justify-between flex-wrap gap-3 mb-3">
+          <span class="text-emerald-400 font-bold text-sm">Módulo 1.1</span>
+          <div class="flex items-center gap-4"><span class="text-neutral-500 text-sm">~35 min</span>
+            <span data-inema-meter="modulo:1-1" class="text-xs text-emerald-400 font-semibold"><span data-inema-meter-frac>0 de 6</span></span></div>
+        </div>
+        <h2 class="text-2xl font-bold mb-2">🔁 O que o Astra muda no loop de trabalho</h2>
+        <p class="text-neutral-400">GPT-6 Astra é um modelo. O que muda para você não é o número no benchmark, é o tamanho da unidade de trabalho que dá para entregar de uma vez: em vez de pedir um trecho, você pede o resultado, o agente executa, você verifica. Este módulo fixa esse loop e o vocabulário que o resto do curso usa.</p>
+      </div>
+      <div class="p-6">
+        <p class="text-sm text-neutral-500 mb-4 font-semibold uppercase tracking-wider">Tópicos do módulo</p>
+        <div class="space-y-3 divide-y divide-dark-600">
+          
+          <div class="topic-item pt-3 first:pt-0">
+            <button onclick="toggleTopic(this)" class="w-full flex items-center justify-start gap-3 text-left group" aria-expanded="false" aria-controls="t1m1-1-exp1">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-bold flex items-center justify-center flex-shrink-0">1</span>
+              <div><span class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors">📦 A unidade de trabalho cresceu</span><p class="text-xs text-neutral-500 mt-0.5">De "escreva a função" para "troque o modelo do projeto e confirme rodando"</p></div>
+            </button>
+            <div class="topic-explanation mt-4 pl-9" id="t1m1-1-exp1">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">O que é</p><p class="text-sm text-neutral-300">A diferença operacional entre pedir um pedaço e pedir a tarefa inteira, e por que o Astra torna a segunda forma o padrão.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Por que aprender</p><p class="text-sm text-neutral-300">Quem continua pedindo pedaços paga o custo do modelo caro e fica com o trabalho de costurar. O ganho está em delegar a unidade maior e gastar seu tempo verificando.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Conceitos-chave</p><p class="text-sm text-neutral-300">Tarefa inteira, critério de pronto, verificação, loop delegar/verificar/iterar.</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="topic-item pt-3 ">
+            <button onclick="toggleTopic(this)" class="w-full flex items-center justify-start gap-3 text-left group" aria-expanded="false" aria-controls="t1m1-1-exp2">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-bold flex items-center justify-center flex-shrink-0">2</span>
+              <div><span class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors">📊 Benchmarks: o que ler e o que ignorar</span><p class="text-xs text-neutral-500 mt-0.5">Os números da página de lançamento e o que eles não medem</p></div>
+            </button>
+            <div class="topic-explanation mt-4 pl-9" id="t1m1-1-exp2">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">O que é</p><p class="text-sm text-neutral-300">O que a OpenAI publicou no lançamento, como interpretar e o que não dá para concluir sobre o seu projeto.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Por que aprender</p><p class="text-sm text-neutral-300">Você vai ver esses números repetidos em todo lugar. Saber o que eles medem evita duas decisões ruins: ignorar o modelo e confiar cego nele.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Conceitos-chave</p><p class="text-sm text-neutral-300">Computer use, resolução de tarefas, custo por tarefa, amostra do seu projeto.</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="topic-item pt-3 ">
+            <button onclick="toggleTopic(this)" class="w-full flex items-center justify-start gap-3 text-left group" aria-expanded="false" aria-controls="t1m1-1-exp3">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-bold flex items-center justify-center flex-shrink-0">3</span>
+              <div><span class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors">🧱 As três superfícies: app, Codex e CLI</span><p class="text-xs text-neutral-500 mt-0.5">Mesmo modelo, três formas de dar tarefa</p></div>
+            </button>
+            <div class="topic-explanation mt-4 pl-9" id="t1m1-1-exp3">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">O que é</p><p class="text-sm text-neutral-300">Onde o Astra aparece para você: ChatGPT (chat e área de trabalho), app do Codex e Codex CLI no terminal. O que cada uma faz melhor.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Por que aprender</p><p class="text-sm text-neutral-300">A superfície errada desperdiça a tarefa. Chat para pensar, Codex para projetos com arquivos, CLI para automatizar e integrar.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Conceitos-chave</p><p class="text-sm text-neutral-300">ChatGPT chat, ChatGPT "trabalho", app Codex, Codex CLI, sessão, projeto.</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="topic-item pt-3 ">
+            <button onclick="toggleTopic(this)" class="w-full flex items-center justify-start gap-3 text-left group" aria-expanded="false" aria-controls="t1m1-1-exp4">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-bold flex items-center justify-center flex-shrink-0">4</span>
+              <div><span class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors">🧾 O contrato de tarefa em três linhas</span><p class="text-xs text-neutral-500 mt-0.5">Resultado, onde, prova</p></div>
+            </button>
+            <div class="topic-explanation mt-4 pl-9" id="t1m1-1-exp4">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">O que é</p><p class="text-sm text-neutral-300">O molde mínimo de pedido que faz uma tarefa sair verificável: o resultado esperado, onde ele deve aparecer e qual evidência encerra.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Por que aprender</p><p class="text-sm text-neutral-300">Todo prompt do curso segue este molde. É a diferença entre um agente que termina e um que "acha que terminou".</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Conceitos-chave</p><p class="text-sm text-neutral-300">Resultado, localização, prova de conclusão, escopo negativo.</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="topic-item pt-3 ">
+            <button onclick="toggleTopic(this)" class="w-full flex items-center justify-start gap-3 text-left group" aria-expanded="false" aria-controls="t1m1-1-exp5">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-bold flex items-center justify-center flex-shrink-0">5</span>
+              <div><span class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors">🧭 Onde as coisas somem: sessões, projetos e pin</span><p class="text-xs text-neutral-500 mt-0.5">Organização do app do Codex antes que ela te custe uma tarde</p></div>
+            </button>
+            <div class="topic-explanation mt-4 pl-9" id="t1m1-1-exp5">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">O que é</p><p class="text-sm text-neutral-300">Como o app do Codex organiza conversas por projeto, por que sessões parecem desaparecer e a rotina de pin/fork que evita perder trabalho.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Por que aprender</p><p class="text-sm text-neutral-300">Com três ou quatro tarefas em paralelo, a interface some com conversas. A rotina custa dez segundos e evita procurar por vinte minutos.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Conceitos-chave</p><p class="text-sm text-neutral-300">Projeto, sessão, pin, fork, resume, recentes.</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="topic-item pt-3 ">
+            <button onclick="toggleTopic(this)" class="w-full flex items-center justify-start gap-3 text-left group" aria-expanded="false" aria-controls="t1m1-1-exp6">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-bold flex items-center justify-center flex-shrink-0">6</span>
+              <div><span class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors">🗺️ Mapa do curso e o que você vai construir</span><p class="text-xs text-neutral-500 mt-0.5">Oito módulos, um sistema no fim</p></div>
+            </button>
+            <div class="topic-explanation mt-4 pl-9" id="t1m1-1-exp6">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">O que é</p><p class="text-sm text-neutral-300">O que cada módulo entrega e como as peças se encaixam num sistema de trabalho: superfícies, contrato, computer use, iteração, skills, MCP, cota e memória.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Por que aprender</p><p class="text-sm text-neutral-300">Saber o destino permite pular o que você já domina e prestar atenção no que muda o seu fluxo.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Conceitos-chave</p><p class="text-sm text-neutral-300">Trilha 1 setup e operação, trilha 2 construir e escalar.</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-6 flex justify-start">
+          <a href="modulo-1-1.html" class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-semibold rounded-xl border border-emerald-500/30 transition-colors text-sm">Ver Completo →</a>
+        </div>
+      </div>
+    </div>
+    <div id="modulo-1-2" class="bg-dark-800 rounded-2xl border border-dark-600 mb-8 overflow-hidden scroll-mt-20" data-inema-module="1-2">
+      <div class="p-6 border-b border-dark-600">
+        <div class="flex items-start justify-between flex-wrap gap-3 mb-3">
+          <span class="text-emerald-400 font-bold text-sm">Módulo 1.2</span>
+          <div class="flex items-center gap-4"><span class="text-neutral-500 text-sm">~40 min</span>
+            <span data-inema-meter="modulo:1-2" class="text-xs text-emerald-400 font-semibold"><span data-inema-meter-frac>0 de 6</span></span></div>
+        </div>
+        <h2 class="text-2xl font-bold mb-2">🔌 Ativando: app, Codex e CLI</h2>
+        <p class="text-neutral-400">Ativar o Astra é trivial quando você sabe onde olhar e frustrante quando não sabe: o seletor do chat pode não mostrar o modelo, o app precisa de atualização, o CLI lê um arquivo de configuração. Este módulo cobre as três superfícies com um comando de verificação em cada uma.</p>
+      </div>
+      <div class="p-6">
+        <p class="text-sm text-neutral-500 mb-4 font-semibold uppercase tracking-wider">Tópicos do módulo</p>
+        <div class="space-y-3 divide-y divide-dark-600">
+          
+          <div class="topic-item pt-3 first:pt-0">
+            <button onclick="toggleTopic(this)" class="w-full flex items-center justify-start gap-3 text-left group" aria-expanded="false" aria-controls="t1m1-2-exp1">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-bold flex items-center justify-center flex-shrink-0">1</span>
+              <div><span class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors">🖥️ ChatGPT: atualizar e achar o seletor</span><p class="text-xs text-neutral-500 mt-0.5">O modelo aparece na área de trabalho, não necessariamente no chat</p></div>
+            </button>
+            <div class="topic-explanation mt-4 pl-9" id="t1m1-2-exp1">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">O que é</p><p class="text-sm text-neutral-300">Como colocar o Astra disponível no app de computador do ChatGPT: plano, atualização do app e o lugar certo do seletor.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Por que aprender</p><p class="text-sm text-neutral-300">A causa mais comum de "não tenho o Astra" é o app desatualizado ou o seletor errado, não o plano.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Conceitos-chave</p><p class="text-sm text-neutral-300">Plano, verificar atualizações, relançar, seletor de modelo, área de trabalho.</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="topic-item pt-3 ">
+            <button onclick="toggleTopic(this)" class="w-full flex items-center justify-start gap-3 text-left group" aria-expanded="false" aria-controls="t1m1-2-exp2">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-bold flex items-center justify-center flex-shrink-0">2</span>
+              <div><span class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors">🧰 App do Codex: atualizar e selecionar</span><p class="text-xs text-neutral-500 mt-0.5">Modelo por sessão, esforço de raciocínio por tarefa</p></div>
+            </button>
+            <div class="topic-explanation mt-4 pl-9" id="t1m1-2-exp2">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">O que é</p><p class="text-sm text-neutral-300">Como atualizar o app do Codex, escolher o Astra e ajustar o nível de esforço de raciocínio por tipo de tarefa.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Por que aprender</p><p class="text-sm text-neutral-300">No Codex o modelo é escolhido por sessão e o esforço de raciocínio muda custo e tempo. Escolher errado custa cota (módulo 2.3).</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Conceitos-chave</p><p class="text-sm text-neutral-300">Atualizar Codex, seletor por sessão, esforço de raciocínio (medium, high), projeto.</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="topic-item pt-3 ">
+            <button onclick="toggleTopic(this)" class="w-full flex items-center justify-start gap-3 text-left group" aria-expanded="false" aria-controls="t1m1-2-exp3">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-bold flex items-center justify-center flex-shrink-0">3</span>
+              <div><span class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors">⌨️ Codex CLI: config.toml e flags</span><p class="text-xs text-neutral-500 mt-0.5">O modelo é uma linha; o resto é política</p></div>
+            </button>
+            <div class="topic-explanation mt-4 pl-9" id="t1m1-2-exp3">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">O que é</p><p class="text-sm text-neutral-300">Instalar ou atualizar o Codex CLI, definir o modelo no config.toml, sobrescrever por flag e conferir com doctor.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Por que aprender</p><p class="text-sm text-neutral-300">O CLI é a superfície que você automatiza. Se o modelo padrão está errado ali, todo script herda o erro.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Conceitos-chave</p><p class="text-sm text-neutral-300">config.toml, model, model_reasoning_effort, -m, codex doctor, trust_level.</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="topic-item pt-3 ">
+            <button onclick="toggleTopic(this)" class="w-full flex items-center justify-start gap-3 text-left group" aria-expanded="false" aria-controls="t1m1-2-exp4">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-bold flex items-center justify-center flex-shrink-0">4</span>
+              <div><span class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors">📌 A conversa de trabalho fixada</span><p class="text-xs text-neutral-500 mt-0.5">Uma sessão longa por projeto, com instruções na pasta</p></div>
+            </button>
+            <div class="topic-explanation mt-4 pl-9" id="t1m1-2-exp4">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">O que é</p><p class="text-sm text-neutral-300">Como estruturar a sessão principal de um projeto: pasta, AGENTS.md com instruções permanentes, pin e o primeiro prompt de contexto.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Por que aprender</p><p class="text-sm text-neutral-300">Sem instruções na pasta, você repete as mesmas regras em todo prompt. Com AGENTS.md, o agente lê antes de agir.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Conceitos-chave</p><p class="text-sm text-neutral-300">AGENTS.md, instruções do projeto, sessão principal, contexto inicial.</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="topic-item pt-3 ">
+            <button onclick="toggleTopic(this)" class="w-full flex items-center justify-start gap-3 text-left group" aria-expanded="false" aria-controls="t1m1-2-exp5">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-bold flex items-center justify-center flex-shrink-0">5</span>
+              <div><span class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors">🛡️ Sandbox, aprovações e o que ele pode tocar</span><p class="text-xs text-neutral-500 mt-0.5">Decida antes da primeira tarefa destrutiva</p></div>
+            </button>
+            <div class="topic-explanation mt-4 pl-9" id="t1m1-2-exp5">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">O que é</p><p class="text-sm text-neutral-300">Os modos de sandbox e a política de aprovação do Codex: o que o agente pode ler, escrever e executar sem perguntar.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Por que aprender</p><p class="text-sm text-neutral-300">Aprovar tudo às cegas é o caminho para um `rm` na pasta errada. Bloquear tudo transforma cada tarefa em vinte cliques.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Conceitos-chave</p><p class="text-sm text-neutral-300">sandbox_mode, ask-for-approval, on-request, never, trust_level, full access.</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="topic-item pt-3 ">
+            <button onclick="toggleTopic(this)" class="w-full flex items-center justify-start gap-3 text-left group" aria-expanded="false" aria-controls="t1m1-2-exp6">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-bold flex items-center justify-center flex-shrink-0">6</span>
+              <div><span class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors">✅ Prova das três superfícies</span><p class="text-xs text-neutral-500 mt-0.5">Um teste de dois minutos que fecha o módulo</p></div>
+            </button>
+            <div class="topic-explanation mt-4 pl-9" id="t1m1-2-exp6">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">O que é</p><p class="text-sm text-neutral-300">Um roteiro único que confirma modelo, harness e permissões nas três superfícies e deixa um registro para o próximo módulo.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Por que aprender</p><p class="text-sm text-neutral-300">Descobrir que o CLI estava no modelo errado no meio de uma automação custa mais que dois minutos agora.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Conceitos-chave</p><p class="text-sm text-neutral-300">Prova por superfície, registro, config conferida.</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-6 flex justify-start">
+          <a href="modulo-1-2.html" class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-semibold rounded-xl border border-emerald-500/30 transition-colors text-sm">Ver Completo →</a>
+        </div>
+      </div>
+    </div>
+    <div id="modulo-1-3" class="bg-dark-800 rounded-2xl border border-dark-600 mb-8 overflow-hidden scroll-mt-20" data-inema-module="1-3">
+      <div class="p-6 border-b border-dark-600">
+        <div class="flex items-start justify-between flex-wrap gap-3 mb-3">
+          <span class="text-emerald-400 font-bold text-sm">Módulo 1.3</span>
+          <div class="flex items-center gap-4"><span class="text-neutral-500 text-sm">~40 min</span>
+            <span data-inema-meter="modulo:1-3" class="text-xs text-emerald-400 font-semibold"><span data-inema-meter-frac>0 de 6</span></span></div>
+        </div>
+        <h2 class="text-2xl font-bold mb-2">🖱️ Computer use no navegador</h2>
+        <p class="text-neutral-400">Com a extensão do ChatGPT no navegador, o Astra abre sites, preenche formulários e publica. Na primeira sessão de teste ele postou um anúncio com o nome errado do produto: executou perfeitamente o pedido errado. Este módulo monta o fluxo que impede isso: extensão, rascunho antes de publicar, permissões e prova.</p>
+      </div>
+      <div class="p-6">
+        <p class="text-sm text-neutral-500 mb-4 font-semibold uppercase tracking-wider">Tópicos do módulo</p>
+        <div class="space-y-3 divide-y divide-dark-600">
+          
+          <div class="topic-item pt-3 first:pt-0">
+            <button onclick="toggleTopic(this)" class="w-full flex items-center justify-start gap-3 text-left group" aria-expanded="false" aria-controls="t1m1-3-exp1">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-bold flex items-center justify-center flex-shrink-0">1</span>
+              <div><span class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors">🧩 Ligar a extensão e vincular a conta</span><p class="text-xs text-neutral-500 mt-0.5">O que "computer use" significa aqui e o que precisa estar instalado</p></div>
+            </button>
+            <div class="topic-explanation mt-4 pl-9" id="t1m1-3-exp1">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">O que é</p><p class="text-sm text-neutral-300">O que a extensão de navegador do ChatGPT faz, como habilitar, vincular e confirmar que o agente enxerga a aba.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Por que aprender</p><p class="text-sm text-neutral-300">Sem a extensão habilitada, o agente descreve o que faria em vez de fazer. O sintoma engana: parece que ele "não quer".</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Conceitos-chave</p><p class="text-sm text-neutral-300">Extensão de navegador, vincular conta, aba controlada, sessão logada.</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="topic-item pt-3 ">
+            <button onclick="toggleTopic(this)" class="w-full flex items-center justify-start gap-3 text-left group" aria-expanded="false" aria-controls="t1m1-3-exp2">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-bold flex items-center justify-center flex-shrink-0">2</span>
+              <div><span class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors">📝 Rascunho primeiro: o caso do nome errado</span><p class="text-xs text-neutral-500 mt-0.5">Executar perfeito o pedido errado é o modo de falha padrão</p></div>
+            </button>
+            <div class="topic-explanation mt-4 pl-9" id="t1m1-3-exp2">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">O que é</p><p class="text-sm text-neutral-300">Por que toda ação de publicação começa com um rascunho que você lê, e o prompt que força isso.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Por que aprender</p><p class="text-sm text-neutral-300">O agente postou "GPT-5" num anúncio sobre o GPT-6. O fluxo estava certo; o conteúdo, errado. Só um humano lendo o rascunho pega isso.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Conceitos-chave</p><p class="text-sm text-neutral-300">Rascunho, revisão humana, publicar só após "ok", prova da publicação.</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="topic-item pt-3 ">
+            <button onclick="toggleTopic(this)" class="w-full flex items-center justify-start gap-3 text-left group" aria-expanded="false" aria-controls="t1m1-3-exp3">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-bold flex items-center justify-center flex-shrink-0">3</span>
+              <div><span class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors">🎯 O contrato de computer use</span><p class="text-xs text-neutral-500 mt-0.5">App exato, resultado, escopo, prova: quatro partes</p></div>
+            </button>
+            <div class="topic-explanation mt-4 pl-9" id="t1m1-3-exp3">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">O que é</p><p class="text-sm text-neutral-300">A versão do contrato de tarefa para ações no navegador: nomear o site e a aba, o resultado, o que não tocar e a evidência.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Por que aprender</p><p class="text-sm text-neutral-300">No navegador o agente tem mais liberdade que num repo. Sem escopo negativo, ele resolve problemas que você não pediu.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Conceitos-chave</p><p class="text-sm text-neutral-300">Site nomeado, resultado, escopo negativo, prova visual.</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="topic-item pt-3 ">
+            <button onclick="toggleTopic(this)" class="w-full flex items-center justify-start gap-3 text-left group" aria-expanded="false" aria-controls="t1m1-3-exp4">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-bold flex items-center justify-center flex-shrink-0">4</span>
+              <div><span class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors">🔐 Permissões, reinícios e "continue"</span><p class="text-xs text-neutral-500 mt-0.5">O que acontece quando ele para no meio</p></div>
+            </button>
+            <div class="topic-explanation mt-4 pl-9" id="t1m1-3-exp4">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">O que é</p><p class="text-sm text-neutral-300">Os momentos em que o agente pede permissão, reinicia ou perde a aba, e como retomar sem perder o trabalho.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Por que aprender</p><p class="text-sm text-neutral-300">Em tarefas longas o agente vai parar pedindo permissão ou porque o app reiniciou. Quem não sabe retomar recomeça do zero.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Conceitos-chave</p><p class="text-sm text-neutral-300">Pedido de permissão, reinício do app, retomar com "continue", mesma conversa.</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="topic-item pt-3 ">
+            <button onclick="toggleTopic(this)" class="w-full flex items-center justify-start gap-3 text-left group" aria-expanded="false" aria-controls="t1m1-3-exp5">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-bold flex items-center justify-center flex-shrink-0">5</span>
+              <div><span class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors">🔗 Referenciar a tela: screenshot e seleção</span><p class="text-xs text-neutral-500 mt-0.5">Mostrar é mais barato que descrever</p></div>
+            </button>
+            <div class="topic-explanation mt-4 pl-9" id="t1m1-3-exp5">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">O que é</p><p class="text-sm text-neutral-300">Como anexar screenshot, apontar um elemento da página e usar isso para pedir mudanças precisas.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Por que aprender</p><p class="text-sm text-neutral-300">"O botão azul do canto" gera ambiguidade. Um screenshot com o elemento marcado elimina uma rodada inteira de correção.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Conceitos-chave</p><p class="text-sm text-neutral-300">Screenshot anexado, referência a elemento, -i no CLI, antes/depois.</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="topic-item pt-3 ">
+            <button onclick="toggleTopic(this)" class="w-full flex items-center justify-start gap-3 text-left group" aria-expanded="false" aria-controls="t1m1-3-exp6">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-bold flex items-center justify-center flex-shrink-0">6</span>
+              <div><span class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors">🧪 Prática: uma ação real com rascunho e prova</span><p class="text-xs text-neutral-500 mt-0.5">Do contrato ao screenshot final</p></div>
+            </button>
+            <div class="topic-explanation mt-4 pl-9" id="t1m1-3-exp6">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">O que é</p><p class="text-sm text-neutral-300">Um exercício completo em site seu: rascunho, revisão, publicação, prova e rollback se preciso.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Por que aprender</p><p class="text-sm text-neutral-300">O fluxo só vira hábito depois de rodar inteiro uma vez, incluindo o momento de ler o rascunho e achar um erro.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Conceitos-chave</p><p class="text-sm text-neutral-300">Exercício completo, rascunho, ok, prova, rollback.</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-6 flex justify-start">
+          <a href="modulo-1-3.html" class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-semibold rounded-xl border border-emerald-500/30 transition-colors text-sm">Ver Completo →</a>
+        </div>
+      </div>
+    </div>
+    <div id="modulo-1-4" class="bg-dark-800 rounded-2xl border border-dark-600 mb-8 overflow-hidden scroll-mt-20" data-inema-module="1-4">
+      <div class="p-6 border-b border-dark-600">
+        <div class="flex items-start justify-between flex-wrap gap-3 mb-3">
+          <span class="text-emerald-400 font-bold text-sm">Módulo 1.4</span>
+          <div class="flex items-center gap-4"><span class="text-neutral-500 text-sm">~45 min</span>
+            <span data-inema-meter="modulo:1-4" class="text-xs text-emerald-400 font-semibold"><span data-inema-meter-frac>0 de 6</span></span></div>
+        </div>
+        <h2 class="text-2xl font-bold mb-2">🧑‍💻 Codar com o Astra: trocar, refatorar, rollback</h2>
+        <p class="text-neutral-400">Três tarefas reais num projeto local: trocar o modelo de um serviço, refatorar a interface e reverter quando o resultado ficou pior. O redesign de um painel saiu pior na primeira rodada e melhor na segunda. O módulo mostra como iterar sem medo: git antes, fork da sessão, critério de aceite, rollback em um comando.</p>
+      </div>
+      <div class="p-6">
+        <p class="text-sm text-neutral-500 mb-4 font-semibold uppercase tracking-wider">Tópicos do módulo</p>
+        <div class="space-y-3 divide-y divide-dark-600">
+          
+          <div class="topic-item pt-3 first:pt-0">
+            <button onclick="toggleTopic(this)" class="w-full flex items-center justify-start gap-3 text-left group" aria-expanded="false" aria-controls="t1m1-4-exp1">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-bold flex items-center justify-center flex-shrink-0">1</span>
+              <div><span class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors">🔧 Tarefa 1: trocar o modelo de um serviço local</span><p class="text-xs text-neutral-500 mt-0.5">Localizar, editar, reiniciar, provar</p></div>
+            </button>
+            <div class="topic-explanation mt-4 pl-9" id="t1m1-4-exp1">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">O que é</p><p class="text-sm text-neutral-300">A tarefa que abriu o curso, agora com o contrato completo e o git preparado antes.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Por que aprender</p><p class="text-sm text-neutral-300">É a tarefa mais simples que exercita o loop inteiro. Se ela falha, o problema é setup, não modelo.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Conceitos-chave</p><p class="text-sm text-neutral-300">git status limpo, contrato, grep como prova, reinício do serviço.</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="topic-item pt-3 ">
+            <button onclick="toggleTopic(this)" class="w-full flex items-center justify-start gap-3 text-left group" aria-expanded="false" aria-controls="t1m1-4-exp2">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-bold flex items-center justify-center flex-shrink-0">2</span>
+              <div><span class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors">🎨 Tarefa 2: refatorar a UI sem mudar comportamento</span><p class="text-xs text-neutral-500 mt-0.5">Fork da sessão, critério de aceite, antes/depois</p></div>
+            </button>
+            <div class="topic-explanation mt-4 pl-9" id="t1m1-4-exp2">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">O que é</p><p class="text-sm text-neutral-300">Redesign da tela principal com escopo fechado em visual, num fork da sessão, com screenshot de antes e depois como prova.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Por que aprender</p><p class="text-sm text-neutral-300">"Mais moderno" sem critério produz telas mais escuras e mais vazias. Critério de aceite e antes/depois transformam gosto em verificação.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Conceitos-chave</p><p class="text-sm text-neutral-300">Fork, escopo visual, critério de aceite, antes/depois, sem mudança de rota ou dado.</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="topic-item pt-3 ">
+            <button onclick="toggleTopic(this)" class="w-full flex items-center justify-start gap-3 text-left group" aria-expanded="false" aria-controls="t1m1-4-exp3">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-bold flex items-center justify-center flex-shrink-0">3</span>
+              <div><span class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors">⏪ Tarefa 3: rollback quando ficou pior</span><p class="text-xs text-neutral-500 mt-0.5">Um comando, e a segunda rodada com critério</p></div>
+            </button>
+            <div class="topic-explanation mt-4 pl-9" id="t1m1-4-exp3">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">O que é</p><p class="text-sm text-neutral-300">Como voltar a versão anterior em segundos e reaproveitar a sessão para a rodada seguinte, com o que aprendeu da primeira.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Por que aprender</p><p class="text-sm text-neutral-300">Sem rollback rápido, você aceita o resultado pior por preguiça. Com rollback, iterar é barato e o gosto melhora a cada rodada.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Conceitos-chave</p><p class="text-sm text-neutral-300">git checkout, git stash, restore, rodada 2, critério aprendido.</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="topic-item pt-3 ">
+            <button onclick="toggleTopic(this)" class="w-full flex items-center justify-start gap-3 text-left group" aria-expanded="false" aria-controls="t1m1-4-exp4">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-bold flex items-center justify-center flex-shrink-0">4</span>
+              <div><span class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors">🧭 Trabalhar com projetos que você não conhece</span><p class="text-xs text-neutral-500 mt-0.5">Reconhecimento antes de mudança</p></div>
+            </button>
+            <div class="topic-explanation mt-4 pl-9" id="t1m1-4-exp4">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">O que é</p><p class="text-sm text-neutral-300">Como usar o agente para mapear um repositório desconhecido antes de delegar mudanças, e como limitar o raio de ação.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Por que aprender</p><p class="text-sm text-neutral-300">O Astra acha o arquivo certo num projeto novo. Isso é bom até ele achar dois e escolher o errado. Reconhecimento primeiro reduz o raio.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Conceitos-chave</p><p class="text-sm text-neutral-300">Reconhecimento, mapa de arquivos, raio de ação, lista de arquivos permitidos.</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="topic-item pt-3 ">
+            <button onclick="toggleTopic(this)" class="w-full flex items-center justify-start gap-3 text-left group" aria-expanded="false" aria-controls="t1m1-4-exp5">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-bold flex items-center justify-center flex-shrink-0">5</span>
+              <div><span class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors">🤖 Astra dentro do seu agente local</span><p class="text-xs text-neutral-500 mt-0.5">Usar a assinatura, não uma chave de API</p></div>
+            </button>
+            <div class="topic-explanation mt-4 pl-9" id="t1m1-4-exp5">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">O que é</p><p class="text-sm text-neutral-300">Como apontar um agente ou serviço local para o Astra usando a sessão do Codex em vez de uma chave paga, e como pedir ao próprio Codex que faça essa troca.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Por que aprender</p><p class="text-sm text-neutral-300">O mesmo modelo pode servir vários agentes seus sem custo de API extra. A troca é uma tarefa delegável.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Conceitos-chave</p><p class="text-sm text-neutral-300">Perfil de modelo, provedor Codex, sem chave de API, troca delegada.</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="topic-item pt-3 ">
+            <button onclick="toggleTopic(this)" class="w-full flex items-center justify-start gap-3 text-left group" aria-expanded="false" aria-controls="t1m1-4-exp6">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-bold flex items-center justify-center flex-shrink-0">6</span>
+              <div><span class="font-semibold text-neutral-100 group-hover:text-emerald-400 transition-colors">📋 Prática: as três tarefas em sequência</span><p class="text-xs text-neutral-500 mt-0.5">Trocar, refatorar, reverter, commit</p></div>
+            </button>
+            <div class="topic-explanation mt-4 pl-9" id="t1m1-4-exp6">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">O que é</p><p class="text-sm text-neutral-300">Roteiro fechado que encadeia as três tarefas num projeto seu e termina com um commit revisado.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Por que aprender</p><p class="text-sm text-neutral-300">Encadeadas, as tarefas mostram o custo real: setup uma vez, depois cada iteração é minutos.</p></div>
+                <div class="bg-dark-700 rounded-xl p-4 border border-dark-600"><p class="text-xs font-semibold text-emerald-400 mb-2">Conceitos-chave</p><p class="text-sm text-neutral-300">Roteiro, ordem, commit final com mensagem de aceite.</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-6 flex justify-start">
+          <a href="modulo-1-4.html" class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-semibold rounded-xl border border-emerald-500/30 transition-colors text-sm">Ver Completo →</a>
+        </div>
+      </div>
+    </div>
+    <div class="flex justify-between items-center mt-10 pt-8 border-t border-dark-600 flex-wrap gap-3">
+      <a href="../../index.html" class="inline-flex items-center gap-2 px-5 py-2.5 bg-dark-700 hover:bg-dark-600 text-neutral-300 font-semibold rounded-xl border border-dark-600 transition-colors text-sm">← Página inicial</a>
+      <a href="../trilha2/index.html" class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 font-semibold rounded-xl border border-blue-500/30 transition-colors text-sm">Trilha 2: Escalar →</a>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-dark-600 mt-16 py-8">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-neutral-500 text-sm space-y-2">
+      <p>GPT-6 Astra: operação técnica · Trilha 1 — Setup e operação · 2026 ·
+        <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300">INEMA.CLUB</a> -
+        <a href="https://inema.pro" target="_blank" class="text-amber-700 dark:text-slate-300">PRO</a></p>
+      <p class="text-xs">Fontes: <a href="https://openai.com/index/gpt-6-astra/" target="_blank" class="text-sky-400 hover:text-sky-300">página de lançamento do GPT-6 Astra</a> (OpenAI) · <a href="https://developers.openai.com/codex/" target="_blank" class="text-sky-400 hover:text-sky-300">documentação do Codex</a> · <a href="https://www.remotion.dev/" target="_blank" class="text-sky-400 hover:text-sky-300">Remotion</a> · <a href="https://github.com/ahujasid/blender-mcp" target="_blank" class="text-sky-400 hover:text-sky-300">Blender MCP</a> · <a href="https://obsidian.md/" target="_blank" class="text-sky-400 hover:text-sky-300">Obsidian</a>. Comandos conferidos no Codex CLI 0.153 (set/2026). Versão leiga deste conteúdo: <a href="https://inematds.github.io/gpt6-astra/" target="_blank" class="text-sky-400 hover:text-sky-300">GPT-6 Astra na prática</a>.</p>
+    </div>
+  </footer>
+
+  <!-- SCRIPTS núcleo v1 -->
+  <script>
+    function toggleTopic(button) {
+      const topicItem = button.closest('.topic-item');
+      const explanation = topicItem.querySelector('.topic-explanation');
+      const moduleCard = button.closest('.bg-dark-800');
+      if (moduleCard) {
+        moduleCard.querySelectorAll('.topic-explanation.active').forEach(exp => {
+          if (exp !== explanation) { exp.classList.remove('active'); const b = exp.parentElement.querySelector('[aria-controls="' + exp.id + '"]'); if (b) b.setAttribute('aria-expanded', 'false'); }
+        });
+      }
+      const isOpen = explanation.classList.toggle('active');
+      button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    }
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+    const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+    const html = document.documentElement;
+    if (!html.classList.contains('dark')) { themeToggleDarkIcon.classList.remove('hidden'); } else { themeToggleLightIcon.classList.remove('hidden'); }
+    themeToggle.addEventListener('click', () => {
+      themeToggleDarkIcon.classList.toggle('hidden');
+      themeToggleLightIcon.classList.toggle('hidden');
+      html.classList.toggle('dark');
+      const dark = html.classList.contains('dark');
+      localStorage.setItem('theme', dark ? 'dark' : 'light');
+      if (window.INEMA && INEMA.setPref) { try { INEMA.setPref('theme', dark ? 'inema-dark' : 'claro'); } catch (e) {} }
+    });
+    function openModal(modalId) { const m = document.getElementById(modalId); if (m) { m.classList.remove('hidden'); document.body.style.overflow = 'hidden'; } }
+    function closeModal() { document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden')); document.body.style.overflow = 'auto'; }
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+    // Quiz inline (3 perguntas por módulo)
+    document.addEventListener('click', (e) => {
+      const opt = e.target.closest('.qz-opt'); if (!opt) return;
+      const qz = opt.closest('.qz'); if (!qz || qz.hasAttribute('data-answered')) return;
+      const ok = opt.getAttribute('data-ok') === '1';
+      qz.querySelectorAll('.qz-opt').forEach(o => { o.setAttribute('data-state', o.getAttribute('data-ok') === '1' ? 'ok' : (o === opt ? 'no' : '')); o.disabled = true; });
+      qz.setAttribute('data-answered', ok ? 'ok' : 'no');
+      const fb = qz.querySelector('.qz-fb'); if (fb) fb.textContent = (ok ? '✓ Certo. ' : '✗ Não é essa. ') + (fb.getAttribute('data-text') || '');
+    });
+    // Copiar código
+    document.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-copy]'); if (!b) return;
+      const pre = b.closest('.codebox').querySelector('pre');
+      navigator.clipboard && navigator.clipboard.writeText(pre.innerText).then(() => { const t = b.textContent; b.textContent = 'Copiado ✓'; setTimeout(() => b.textContent = t, 1600); });
+    });
+  </script>
+
+  <script src="../../assets/learn.js"></script>
+  <script>
+    if (window.INEMA && typeof window.INEMA.init === 'function') { window.INEMA.init(); }
+  </script>
+</body>
+</html>

@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="inema-course" content="gpt6astratec">
+  <title>O que o Astra muda no loop de trabalho | GPT-6 Astra: operação técnica</title>
+  <meta name="description" content="GPT-6 Astra é um modelo. O que muda para você não é o número no benchmark, é o tamanho da unidade de trabalho que dá para entregar de uma vez: em vez de pedir um trecho, você pede o resultado, o agente executa, você verifica. Este módulo fixa esse loop e o vocabulário que o resto do curso usa.">
+
+  <!-- ANTI-FOUC: bloqueante, antes de tudo -->
+  <script>
+(function () {
+  try {
+    var html = document.documentElement;
+    var DEF = { theme: 'inema-dark', font: 'inter', fontScale: 100, lineWidth: 68, leading: 1.7, accent: 'emerald' };
+    function clone(o) { var r = {}; for (var x in o) r[x] = o[x]; return r; }
+    var p = clone(DEF);
+    try {
+      var raw = localStorage.getItem('inema.prefs');
+      if (raw) { var parsed = JSON.parse(raw); if (parsed && typeof parsed === 'object') { for (var k in DEF) if (parsed[k] != null) p[k] = parsed[k]; } }
+      else { var legacy = localStorage.getItem('theme'); if (legacy === 'light') p.theme = 'claro'; else if (legacy === 'dark') p.theme = 'inema-dark'; }
+    } catch (e) { p = clone(DEF); }
+    var THEMES = { 'inema-dark': { dark: true, attr: null, cs: 'dark' }, 'claro': { dark: false, attr: null, cs: 'light' }, 'sepia': { dark: false, attr: 'sepia', cs: 'light' }, 'foco': { dark: null, attr: 'foco', cs: null }, 'contraste': { dark: true, attr: 'contraste', cs: 'dark' } };
+    var t = THEMES[p.theme] || THEMES['inema-dark'];
+    if (t.dark === true) html.classList.add('dark'); else if (t.dark === false) html.classList.remove('dark');
+    if (t.attr) html.setAttribute('data-theme', t.attr); else html.removeAttribute('data-theme');
+    html.style.colorScheme = (t.cs ? t.cs : (html.classList.contains('dark') ? 'dark' : 'light'));
+    html.setAttribute('data-font', p.font || 'inter'); html.setAttribute('data-accent', p.accent || 'emerald');
+    var s = html.style; var scale = (+p.fontScale || 100);
+    s.setProperty('--inema-font-scale', (scale / 100).toString()); s.setProperty('font-size', scale + '%');
+    s.setProperty('--measure', (+p.lineWidth || 68) + 'ch'); s.setProperty('--lh-body', (+p.leading || 1.7).toString());
+    var fam = p.font === 'system' ? 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif' : (p.font === 'leitura' ? '"Atkinson Hyperlegible", "Inter", system-ui, sans-serif' : '"Inter", system-ui, sans-serif');
+    s.setProperty('--font-body', fam);
+    var ACC = { emerald: [152, 76, 45], blue: [217, 91, 60], purple: [258, 90, 66], amber: [38, 92, 50], teal: [174, 72, 41], rose: [350, 89, 60] };
+    var a = ACC[p.accent] || ACC.emerald;
+    s.setProperty('--accent-h', a[0] + ''); s.setProperty('--accent-s', a[1] + '%'); s.setProperty('--accent-l', a[2] + '%');
+    s.setProperty('--accent', 'hsl(' + a[0] + ' ' + a[1] + '% ' + a[2] + '%)');
+  } catch (err) { try { document.documentElement.classList.add('dark'); document.documentElement.style.colorScheme = 'dark'; } catch (e) {} }
+})();
+</script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class', theme: { extend: { colors: { primary: '#FACC15', dark: { 900: '#111827', 800: '#1f2937', 700: '#374151', 600: '#4b5563' } } } } }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/learn.css">
+
+  <!-- Manifesto do curso (obrigatório em toda página) -->
+  <script type="application/json" data-inema-manifest>
+{
+ "course": "gpt6astratec",
+ "tracks": [
+  {
+   "n": "1",
+   "title": "Setup e operação",
+   "modules": [
+    {
+     "id": "1-1",
+     "title": "O que o Astra muda no loop de trabalho",
+     "topics": 6,
+     "href": "curso/trilha1/modulo-1-1.html"
+    },
+    {
+     "id": "1-2",
+     "title": "Ativando: app, Codex e CLI",
+     "topics": 6,
+     "href": "curso/trilha1/modulo-1-2.html"
+    },
+    {
+     "id": "1-3",
+     "title": "Computer use no navegador",
+     "topics": 6,
+     "href": "curso/trilha1/modulo-1-3.html"
+    },
+    {
+     "id": "1-4",
+     "title": "Codar com o Astra: trocar, refatorar, rollback",
+     "topics": 6,
+     "href": "curso/trilha1/modulo-1-4.html"
+    }
+   ]
+  },
+  {
+   "n": "2",
+   "title": "Construir e escalar",
+   "modules": [
+    {
+     "id": "2-1",
+     "title": "Skills: ensinar a ferramenta e o gosto",
+     "topics": 6,
+     "href": "curso/trilha2/modulo-2-1.html"
+    },
+    {
+     "id": "2-2",
+     "title": "MCP e trabalhos longos",
+     "topics": 6,
+     "href": "curso/trilha2/modulo-2-2.html"
+    },
+    {
+     "id": "2-3",
+     "title": "Cota, custo e orquestração",
+     "topics": 6,
+     "href": "curso/trilha2/modulo-2-3.html"
+    },
+    {
+     "id": "2-4",
+     "title": "Memória compartilhada e o sistema completo",
+     "topics": 6,
+     "href": "curso/trilha2/modulo-2-4.html"
+    }
+   ]
+  }
+ ]
+}
+  </script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .dark body { background-color: #111827; }
+    .topic-explanation { display: none; }
+    .topic-explanation.active { display: block; }
+    html { scroll-behavior: smooth; }
+    [id] { scroll-margin-top: 5rem; }
+
+    /* Light mode overrides */
+    html:not(.dark) body { background-color: #f8fafc; }
+    html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+    html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+    html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+    html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+    html:not(.dark) .bg-dark-800\/50, html:not(.dark) .bg-dark-800\/60, html:not(.dark) .bg-dark-900\/40, html:not(.dark) .bg-dark-900\/60 { background-color: #f3f4f6; }
+    html:not(.dark) .text-neutral-100 { color: #111827; }
+    html:not(.dark) .text-white { color: #111827; }
+    html:not(.dark) .text-neutral-300 { color: #4b5563; }
+    html:not(.dark) .text-neutral-400 { color: #6b7280; }
+    html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+    html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+    html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+    
+    html:not(.dark) .text-emerald-400 { color: #059669; }
+    html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5, 150, 105, 0.12); }
+    html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5, 150, 105, 0.08); }
+    html:not(.dark) .bg-emerald-900\/20 { background-color: rgba(5, 150, 105, 0.07); }
+    html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5, 150, 105, 0.25); }
+    html:not(.dark) .hover\:bg-emerald-500\/30:hover { background-color: rgba(5, 150, 105, 0.18); }
+    html:not(.dark) .hover\:text-emerald-400:hover { color: #059669; }
+    html:not(.dark) .hover\:bg-emerald-500\/10:hover { background-color: rgba(5, 150, 105, 0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-emerald-400 { color: #059669; }
+
+    html:not(.dark) .text-blue-400 { color: #2563eb; }
+    html:not(.dark) .bg-blue-500\/20 { background-color: rgba(37, 99, 235, 0.12); }
+    html:not(.dark) .bg-blue-500\/10 { background-color: rgba(37, 99, 235, 0.08); }
+    html:not(.dark) .bg-blue-900\/20 { background-color: rgba(37, 99, 235, 0.07); }
+    html:not(.dark) .border-blue-500\/30 { border-color: rgba(37, 99, 235, 0.25); }
+    html:not(.dark) .hover\:bg-blue-500\/30:hover { background-color: rgba(37, 99, 235, 0.18); }
+    html:not(.dark) .hover\:text-blue-400:hover { color: #2563eb; }
+    html:not(.dark) .hover\:bg-blue-500\/10:hover { background-color: rgba(37, 99, 235, 0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-blue-400 { color: #2563eb; }
+
+    html:not(.dark) .text-purple-400 { color: #7c3aed; }
+    html:not(.dark) .bg-purple-500\/20 { background-color: rgba(124, 58, 237, 0.12); }
+    html:not(.dark) .bg-purple-500\/10 { background-color: rgba(124, 58, 237, 0.08); }
+    html:not(.dark) .bg-purple-900\/20 { background-color: rgba(124, 58, 237, 0.07); }
+    html:not(.dark) .border-purple-500\/30 { border-color: rgba(124, 58, 237, 0.25); }
+    html:not(.dark) .hover\:bg-purple-500\/30:hover { background-color: rgba(124, 58, 237, 0.18); }
+    html:not(.dark) .hover\:text-purple-400:hover { color: #7c3aed; }
+    html:not(.dark) .hover\:bg-purple-500\/10:hover { background-color: rgba(124, 58, 237, 0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-purple-400 { color: #7c3aed; }
+
+    html:not(.dark) .text-amber-400 { color: #92400e; }
+    html:not(.dark) .bg-amber-500\/20 { background-color: rgba(146, 64, 14, 0.12); }
+    html:not(.dark) .bg-amber-500\/10 { background-color: rgba(146, 64, 14, 0.08); }
+    html:not(.dark) .bg-amber-900\/20 { background-color: rgba(146, 64, 14, 0.07); }
+    html:not(.dark) .border-amber-500\/30 { border-color: rgba(146, 64, 14, 0.25); }
+    html:not(.dark) .hover\:bg-amber-500\/30:hover { background-color: rgba(146, 64, 14, 0.18); }
+    html:not(.dark) .hover\:text-amber-400:hover { color: #92400e; }
+    html:not(.dark) .hover\:bg-amber-500\/10:hover { background-color: rgba(146, 64, 14, 0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-amber-400 { color: #92400e; }
+
+    html:not(.dark) .text-red-400 { color: #b91c1c; }
+    html:not(.dark) .bg-red-500\/20 { background-color: rgba(185, 28, 28, 0.12); }
+    html:not(.dark) .bg-red-500\/10 { background-color: rgba(185, 28, 28, 0.08); }
+    html:not(.dark) .bg-red-900\/20 { background-color: rgba(185, 28, 28, 0.07); }
+    html:not(.dark) .border-red-500\/30 { border-color: rgba(185, 28, 28, 0.25); }
+    html:not(.dark) .hover\:bg-red-500\/30:hover { background-color: rgba(185, 28, 28, 0.18); }
+    html:not(.dark) .hover\:text-red-400:hover { color: #b91c1c; }
+    html:not(.dark) .hover\:bg-red-500\/10:hover { background-color: rgba(185, 28, 28, 0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-red-400 { color: #b91c1c; }
+    html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+    html:not(.dark) .text-primary { color: #a16207; }
+    html:not(.dark) .bg-primary\/10 { background-color: rgba(161, 98, 7, 0.08); }
+    html:not(.dark) .border-primary\/30 { border-color: rgba(161, 98, 7, 0.25); }
+    html:not(.dark) .text-sky-400 { color: #0369a1; }
+    html:not(.dark) .text-yellow-400 { color: #a16207; }
+    html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+    html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+    html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95); }
+    html:not(.dark) .text-amber-700 { color: #92400e; }
+
+    /* Dark mode - bordas suaves */
+    .dark .border-dark-600 { border-color: #374151; }
+    .dark .divide-dark-600 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+
+    /* SVG */
+    html:not(.dark) svg[role="img"] { filter: saturate(0.82) brightness(0.96); }
+    @keyframes wf-pulse { 0%,100% { opacity:.55 } 50% { opacity:1 } }
+    @keyframes wf-flow { to { stroke-dashoffset: -28; } }
+    @media (prefers-reduced-motion: no-preference) {
+      .wf-a { animation: wf-pulse 2.6s ease-in-out infinite; }
+      .wf-a:nth-child(2){animation-delay:.25s} .wf-a:nth-child(3){animation-delay:.5s}
+      .wf-a:nth-child(4){animation-delay:.75s} .wf-a:nth-child(5){animation-delay:1s} .wf-a:nth-child(6){animation-delay:1.25s}
+      .wf-flow { stroke-dasharray: 6 8; animation: wf-flow 1.4s linear infinite; }
+    }
+
+    /* Quiz */
+    .qz-opt[data-state="ok"] { border-color: #10b981; background: rgba(16,185,129,.15); }
+    .qz-opt[data-state="no"] { border-color: #ef4444; background: rgba(239,68,68,.12); }
+    .qz-fb { display:none; } .qz[data-answered] .qz-fb { display:block; }
+
+    /* TOC do módulo é um bloco inline, não uma barra lateral sticky */
+    [data-inema-toc] { position: static !important; top: auto !important; max-height: none !important; }
+    /* Painel de aparência (classes internas) */
+    .inema-appearance-sec { margin-bottom: .75rem; }
+    .inema-appearance-label { font-size: .7rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #9ca3af; margin-bottom: .35rem; }
+    .inema-appearance-row { display: flex; flex-wrap: wrap; gap: .35rem; }
+    .inema-chip { font-size: .8rem; padding: .3rem .65rem; border-radius: .5rem; border: 1px solid #374151; background: rgba(31,41,55,.6); color: #e5e7eb; cursor: pointer; }
+    .inema-chip:hover { border-color: #FACC15; }
+    .inema-chip[aria-pressed="true"], .inema-chip.is-active { background: rgba(250,204,21,.15); border-color: #FACC15; color: #FACC15; }
+    html:not(.dark) .inema-chip { background: #f3f4f6; color: #111827; border-color: #d1d5db; }
+    html:not(.dark) .inema-chip[aria-pressed="true"], html:not(.dark) .inema-chip.is-active { background: rgba(161,98,7,.1); border-color: #a16207; color: #a16207; }
+    /* Code box */
+    .codebox pre { white-space: pre-wrap; word-break: break-word; }
+    
+  </style>
+</head>
+<body class="bg-dark-900 text-neutral-100 min-h-screen">
+
+  <!-- NAVIGATION -->
+  <nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-14">
+        <div class="flex items-center space-x-3">
+          <a href="../../index.html" class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300">
+            <span class="text-2xl">⚙️</span>
+            <span class="font-bold text-lg hidden md:inline">Astra técnico</span>
+          </a>
+          <span class="text-neutral-600">|</span>
+          <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300 text-sm font-medium">INEMA.CLUB</a>
+          <span class="text-neutral-600 hidden sm:inline">-</span>
+          <a href="https://inema.pro" target="_blank" class="text-amber-700 dark:text-slate-300 hover:opacity-80 text-sm font-medium hidden sm:inline">PRO</a>
+        </div>
+        <div class="flex items-center space-x-1 sm:space-x-2">
+          <a href="../../curso/trilha1/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-emerald-400 bg-emerald-500/10">
+            <span class="sm:hidden">T1</span>
+            <span class="hidden sm:inline">Setup</span>
+          </a>
+          <a href="../../curso/trilha2/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors">
+            <span class="sm:hidden">T2</span>
+            <span class="hidden sm:inline">Escalar</span>
+          </a>
+          <button type="button" data-inema-journey-open class="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-primary bg-primary/10 hover:bg-primary/20 transition-colors">
+            <span>🧭</span><span>Minha jornada</span>
+            <span data-inema-journey-badge class="text-xs px-1.5 py-0.5 rounded-full bg-primary/20"></span>
+          </button>
+          <button type="button" data-inema-appearance-toggle="[data-inema-appearance]" aria-expanded="false" class="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" title="Aparência e leitura">
+            <span aria-hidden="true">Aa</span>
+          </button>
+          <button id="theme-toggle" class="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" title="Tema claro/escuro">
+            <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+            <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+  
+  <div data-inema-appearance class="inema-appearance-pop" role="region" aria-label="Aparência e leitura">
+    <div class="inema-appearance-sec">
+      <p class="inema-appearance-label">Tema</p>
+      <div class="inema-appearance-row">
+        <button type="button" data-inema-set-theme="inema-dark" class="inema-chip">Escuro</button>
+        <button type="button" data-inema-set-theme="claro" class="inema-chip">Claro</button>
+        <button type="button" data-inema-set-theme="sepia" class="inema-chip">Sépia</button>
+        <button type="button" data-inema-set-theme="foco" class="inema-chip">Foco</button>
+        <button type="button" data-inema-set-theme="contraste" class="inema-chip">Contraste</button>
+      </div>
+    </div>
+    <div class="inema-appearance-sec">
+      <p class="inema-appearance-label">Tamanho do texto</p>
+      <div class="inema-appearance-row">
+        <button type="button" data-inema-set-fontscale="90" class="inema-chip">A-</button>
+        <button type="button" data-inema-set-fontscale="100" class="inema-chip">A</button>
+        <button type="button" data-inema-set-fontscale="115" class="inema-chip">A+</button>
+        <button type="button" data-inema-set-fontscale="130" class="inema-chip">A++</button>
+      </div>
+    </div>
+    <div class="inema-appearance-sec">
+      <p class="inema-appearance-label">Fonte</p>
+      <div class="inema-appearance-row">
+        <button type="button" data-inema-set-font="inter" class="inema-chip">Inter</button>
+        <button type="button" data-inema-set-font="system" class="inema-chip">Sistema</button>
+        <button type="button" data-inema-set-font="leitura" class="inema-chip">Leitura</button>
+      </div>
+    </div>
+    <div class="inema-appearance-sec">
+      <p class="inema-appearance-label">Entrelinha</p>
+      <div class="inema-appearance-row">
+        <button type="button" data-inema-set-leading="1.5" class="inema-chip">Compacta</button>
+        <button type="button" data-inema-set-leading="1.7" class="inema-chip">Normal</button>
+        <button type="button" data-inema-set-leading="1.9" class="inema-chip">Ampla</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BREADCRUMB -->
+  <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div class="flex items-center space-x-2 text-sm text-neutral-400">
+      <a href="../../index.html" class="hover:text-emerald-400">Início</a><span>/</span>
+      <a href="index.html" class="hover:text-emerald-400">Trilha 1</a><span>/</span>
+      <span class="text-emerald-400">Módulo 1.1</span>
+    </div>
+  </nav>
+
+  <!-- HEADER -->
+  <header class="bg-gradient-to-br from-emerald-900/30 via-dark-800 to-dark-800 py-12 border-b border-dark-600">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <span class="inline-block px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-semibold rounded-full mb-4">MÓDULO 1.1</span>
+      <h1 class="text-3xl sm:text-4xl font-bold mb-4">🔁 O que o Astra muda no loop de trabalho</h1>
+      <p class="text-lg text-neutral-400 max-w-3xl">GPT-6 Astra é um modelo. O que muda para você não é o número no benchmark, é o tamanho da unidade de trabalho que dá para entregar de uma vez: em vez de pedir um trecho, você pede o resultado, o agente executa, você verifica. Este módulo fixa esse loop e o vocabulário que o resto do curso usa.</p>
+      
+      <div class="grid grid-cols-4 gap-4 mt-8 max-w-2xl">
+        <div class="bg-dark-800/50 rounded-lg p-3 border border-dark-600"><div class="text-xl font-bold text-emerald-400">6</div><div class="text-xs text-neutral-400">Tópicos</div></div><div class="bg-dark-800/50 rounded-lg p-3 border border-dark-600"><div class="text-xl font-bold text-emerald-400">35</div><div class="text-xs text-neutral-400">Minutos</div></div><div class="bg-dark-800/50 rounded-lg p-3 border border-dark-600"><div class="text-xl font-bold text-emerald-400">Básico</div><div class="text-xs text-neutral-400">Nível</div></div><div class="bg-dark-800/50 rounded-lg p-3 border border-dark-600"><div class="text-xl font-bold text-emerald-400">Fundamento</div><div class="text-xs text-neutral-400">Tipo</div></div>
+      </div>
+      <div data-inema-meter="modulo:1-1" class="inema-meter max-w-md mt-6" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Progresso do módulo">
+        <div class="flex justify-between text-sm text-neutral-400 mb-1"><span data-inema-meter-frac>0 de 6</span><span data-inema-meter-pct>0%</span></div>
+        <div class="inema-bar h-2 bg-dark-700 rounded-full overflow-hidden"><div class="inema-bar__fill h-full bg-emerald-500 rounded-full transition-all" data-inema-meter-fill style="width:0%"></div></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 inema-prose" data-inema-module="1-1" data-inema-track="1">
+    <nav aria-label="Tópicos deste módulo" class="mb-12 bg-dark-800 rounded-xl border border-dark-600 p-5" data-inema-toc>
+      <p class="text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-3">Neste módulo</p>
+      <ol class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+        <li><a href="#topico-1" class="flex items-start gap-2 text-neutral-300 hover:text-emerald-400"><span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">1</span><span>A unidade de trabalho cresceu</span></a></li><li><a href="#topico-2" class="flex items-start gap-2 text-neutral-300 hover:text-emerald-400"><span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">2</span><span>Benchmarks: o que ler e o que ignorar</span></a></li><li><a href="#topico-3" class="flex items-start gap-2 text-neutral-300 hover:text-emerald-400"><span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">3</span><span>As três superfícies: app, Codex e CLI</span></a></li><li><a href="#topico-4" class="flex items-start gap-2 text-neutral-300 hover:text-emerald-400"><span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">4</span><span>O contrato de tarefa em três linhas</span></a></li><li><a href="#topico-5" class="flex items-start gap-2 text-neutral-300 hover:text-emerald-400"><span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">5</span><span>Onde as coisas somem: sessões, projetos e pin</span></a></li><li><a href="#topico-6" class="flex items-start gap-2 text-neutral-300 hover:text-emerald-400"><span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">6</span><span>Mapa do curso e o que você vai construir</span></a></li>
+      </ol>
+    </nav>
+
+    <!-- TÓPICO 1 -->
+    <section id="topico-1" data-inema-topic="modulo-1-1#topico-1" class="mb-16">
+      <div class="flex items-center space-x-4 mb-6">
+        <span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl">1</span>
+        <h2 class="text-2xl font-bold">📦 A unidade de trabalho cresceu</h2>
+      </div>
+      <p class="text-neutral-300 mb-6 leading-relaxed" data-inema-block="m1-1-p1">Modelos anteriores já escreviam código. O que muda com o Astra é o tamanho da tarefa que sobrevive inteira de ponta a ponta: localizar o arquivo certo num projeto que ele nunca viu, editar, reiniciar o serviço, abrir a página, ler o resultado e reportar. Num projeto de agentes local, "troque o modelo da seção Codex para gpt-6-astra" foi de prompt a serviço reiniciado com o modelo novo em poucos minutos, sem apontar o arquivo. Isso é o que muda o loop: você deixa de escrever passos e passa a escrever resultados verificáveis.</p>
+
+      <aside class="bg-dark-800/60 rounded-xl border border-dashed border-emerald-500/30 p-5 mb-6">
+        <p class="text-xs font-semibold uppercase tracking-wider text-emerald-400 mb-3">Novo aqui? Termos deste tópico</p>
+        <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+          <div><dt class="font-semibold text-neutral-100">Agente</dt><dd class="text-neutral-400" data-inema-block="m1-1-p2">Um modelo com ferramentas (editar arquivo, rodar comando, abrir navegador) e um loop: planeja, age, lê o resultado, age de novo até terminar.</dd></div><div><dt class="font-semibold text-neutral-100">Codex</dt><dd class="text-neutral-400" data-inema-block="m1-1-p3">O produto de agente de código da OpenAI. Existe como app de computador, extensão no ChatGPT e CLI (linha de comando). Todos usam sua assinatura, não uma chave de API.</dd></div><div><dt class="font-semibold text-neutral-100">Critério de pronto</dt><dd class="text-neutral-400" data-inema-block="m1-1-p4">Condição observável que encerra a tarefa. "Página abre e o seletor mostra gpt-6-astra" é um critério; "melhore o app" não é.</dd></div><div><dt class="font-semibold text-neutral-100">Rollback</dt><dd class="text-neutral-400" data-inema-block="m1-1-p5">Voltar para a versão anterior de um arquivo ou projeto. Com git, é um comando. Sem git, é sorte.</dd></div>
+        </dl>
+      </aside>
+
+      <figure class="rounded-2xl border border-emerald-500/30 bg-dark-900/40 p-3 sm:p-4 mb-6 overflow-hidden">
+        <svg viewBox="0 0 800 200" class="w-full h-auto" role="img" aria-label="O loop de trabalho com o Astra: delegar a tarefa inteira com critério de pronto, o agente executa, você verifica o resultado, itera ou faz rollback"><defs>
+    <linearGradient id="s1-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#10b981"/></linearGradient>
+    <filter id="s1-glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="1.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <pattern id="s1-grid" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="1.3" cy="1.3" r="1.3" fill="#10b981" opacity="0.14"/></pattern>
+  </defs><rect width="800" height="200" fill="url(#s1-grid)"/><g class="wf-a"><rect x="40" y="60" width="162" height="84" rx="12" fill="#064e3b" stroke="#10b981" stroke-width="1.8"/>
+        <circle cx="58" cy="78" r="10" fill="#10b981"/><text x="58" y="82" text-anchor="middle" fill="#0b1220" font-family="Inter,sans-serif" font-size="11" font-weight="700">1</text>
+        <text x="121" y="104" text-anchor="middle" fill="#a7f3d0" font-family="Inter,sans-serif" font-size="12" font-weight="700">Delegar</text>
+        <text x="121" y="122" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5" font-weight="400">resultado + onde + prova</text></g>
+        <path class="wf-flow" d="M204 102 L224 102" stroke="#38bdf8" stroke-width="2" fill="none"/><polygon points="220,97 220,107 226,102" fill="#38bdf8"/><g class="wf-a"><rect x="226" y="60" width="162" height="84" rx="12" fill="#0e1b26" stroke="#38bdf8" stroke-width="1.8"/>
+        <circle cx="244" cy="78" r="10" fill="#38bdf8"/><text x="244" y="82" text-anchor="middle" fill="#0b1220" font-family="Inter,sans-serif" font-size="11" font-weight="700">2</text>
+        <text x="307" y="104" text-anchor="middle" fill="#9ad6ff" font-family="Inter,sans-serif" font-size="12" font-weight="700">Executar</text>
+        <text x="307" y="122" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5" font-weight="400">agente edita, roda, lê</text></g>
+        <path class="wf-flow" d="M390 102 L410 102" stroke="#38bdf8" stroke-width="2" fill="none"/><polygon points="406,97 406,107 412,102" fill="#38bdf8"/><g class="wf-a"><rect x="412" y="60" width="162" height="84" rx="12" fill="#064e3b" stroke="#10b981" stroke-width="1.8"/>
+        <circle cx="430" cy="78" r="10" fill="#10b981"/><text x="430" y="82" text-anchor="middle" fill="#0b1220" font-family="Inter,sans-serif" font-size="11" font-weight="700">3</text>
+        <text x="493" y="104" text-anchor="middle" fill="#a7f3d0" font-family="Inter,sans-serif" font-size="12" font-weight="700">Verificar</text>
+        <text x="493" y="122" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5" font-weight="400">você confere a prova</text></g>
+        <path class="wf-flow" d="M576 102 L596 102" stroke="#38bdf8" stroke-width="2" fill="none"/><polygon points="592,97 592,107 598,102" fill="#38bdf8"/><g class="wf-a"><rect x="598" y="60" width="162" height="84" rx="12" fill="#0e1b26" stroke="#38bdf8" stroke-width="1.8"/>
+        <circle cx="616" cy="78" r="10" fill="#38bdf8"/><text x="616" y="82" text-anchor="middle" fill="#0b1220" font-family="Inter,sans-serif" font-size="11" font-weight="700">4</text>
+        <text x="679" y="104" text-anchor="middle" fill="#9ad6ff" font-family="Inter,sans-serif" font-size="12" font-weight="700">Iterar / rollback</text>
+        <text x="679" y="122" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5" font-weight="400">nova versão ou volta</text></g>
+        
+      <text x="400" y="178" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="11" font-style="italic">O loop de trabalho com o Astra: delegar a tarefa inteira com critério de pronto, o agente executa, você verifica o resultado, itera ou faz rollback</text></svg>
+        <figcaption class="text-xs text-neutral-400 mt-3 px-1"><strong class="text-emerald-400">O que olhar:</strong> Quatro caixas, uma seta. O único ponto em que você aparece é "verificar". Tudo que o curso ensina serve para encurtar as outras três ou para tornar a sua mais barata.</figcaption>
+      </figure>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div class="bg-emerald-900/20 rounded-xl border border-emerald-500/30 p-6">
+          <h4 class="font-bold text-emerald-400 mb-4">&#10003; Pedido que aproveita o modelo</h4>
+          <ul class="space-y-3 text-neutral-300"><li class="flex items-start space-x-2"><span class="text-emerald-400">&#10003;</span><span>"Troque o modelo da seção Codex do projeto em localhost:3000 para gpt-6-astra. Reinicie o serviço e confirme abrindo a página."</span></li><li class="flex items-start space-x-2"><span class="text-emerald-400">&#10003;</span><span>"Refatore o CSS da tela principal para um visual mais moderno. Não mude comportamento. Me mostre o antes/depois."</span></li><li class="flex items-start space-x-2"><span class="text-emerald-400">&#10003;</span><span>"Gere um vídeo promocional de 30 s com Remotion a partir do README. Renderize em MP4 e me diga o caminho."</span></li></ul>
+        </div>
+        <div class="bg-red-900/20 rounded-xl border border-red-500/30 p-6">
+          <h4 class="font-bold text-red-400 mb-4">&#10007; Pedido que desperdiça o modelo</h4>
+          <ul class="space-y-3 text-neutral-300"><li class="flex items-start space-x-2"><span class="text-red-400">&#10007;</span><span>"Qual arquivo contém a configuração do modelo?" (você vai fazer o resto na mão)</span></li><li class="flex items-start space-x-2"><span class="text-red-400">&#10007;</span><span>"Escreva uma função que leia o config.toml" (pedaço, sem contexto do objetivo)</span></li><li class="flex items-start space-x-2"><span class="text-red-400">&#10007;</span><span>"Melhore o app" (sem critério de pronto: qualquer coisa serve, nada serve)</span></li></ul>
+        </div>
+      </div>
+
+      <div class="bg-primary/10 rounded-xl border border-primary/30 p-6 mb-6">
+        <h3 class="text-lg font-semibold text-primary mb-3 flex items-center"><span class="mr-2">💡</span> Regra de bolso</h3>
+        <p class="text-neutral-300" data-inema-block="m1-1-p6">Se você consegue descrever como vai saber que ficou pronto, delegue inteiro. Se não consegue, o problema é seu critério, não o modelo.</p>
+      </div>
+      
+      <button type="button" data-inema-read-toggle class="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors flex items-center space-x-2 justify-start">
+        <span class="inema-ico-todo" aria-hidden="true">&#9744;</span>
+        <span class="inema-ico-done" aria-hidden="true">&#9745;</span>
+        <span class="inema-label-todo">Marcar como lido</span>
+        <span class="inema-label-done">Lido</span>
+      </button>
+    </section>
+
+    <!-- TÓPICO 2 -->
+    <section id="topico-2" data-inema-topic="modulo-1-1#topico-2" class="mb-16">
+      <div class="flex items-center space-x-4 mb-6">
+        <span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl">2</span>
+        <h2 class="text-2xl font-bold">📊 Benchmarks: o que ler e o que ignorar</h2>
+      </div>
+      <p class="text-neutral-300 mb-6 leading-relaxed" data-inema-block="m1-1-p7">A <a href="https://openai.com/index/gpt-6-astra/" target="_blank" class="text-sky-400 hover:text-sky-300 underline decoration-dotted">página de lançamento</a> apresenta o Astra como o modelo mais forte da OpenAI em uso de computador, engenharia de software, segurança e trabalho profissional, com ganhos grandes em benchmarks de agentes e resultados novos em problemas abertos de matemática. A tabela de custo por tarefa resolvida mostra o Astra abaixo dos concorrentes de fronteira, isto é, mais barato por tarefa concluída, não mais barato por token.</p>
+
+      <div class="bg-blue-900/20 rounded-xl border border-blue-500/30 p-6 mb-6">
+        <h3 class="text-lg font-semibold text-blue-400 mb-4 flex items-center"><span class="mr-2">📊</span> O que os números não dizem</h3>
+        <ul class="space-y-3 text-neutral-300"><li class="flex items-start space-x-2"><span class="text-blue-400 mt-1">&#8226;</span><span>Benchmark mede tarefas de laboratório com critério de pronto definido pelo avaliador. O seu projeto não tem esse critério até você escrever.</span></li><li class="flex items-start space-x-2"><span class="text-blue-400 mt-1">&#8226;</span><span>Custo por tarefa resolvida assume que a tarefa foi resolvida. Uma tarefa mal especificada gera três tentativas caras.</span></li><li class="flex items-start space-x-2"><span class="text-blue-400 mt-1">&#8226;</span><span>Velocidade percebida ("fez em 2 minutos o que levava 30") vem de sessões ao vivo, não de medição controlada. Trate como indício.</span></li><li class="flex items-start space-x-2"><span class="text-blue-400 mt-1">&#8226;</span><span>Saturar um benchmark significa que ele parou de discriminar modelos, não que o modelo parou de errar.</span></li></ul>
+      </div>
+
+      <figure class="rounded-2xl border border-emerald-500/30 bg-dark-900/40 p-3 sm:p-4 mb-6 overflow-hidden">
+        <svg viewBox="0 0 800 320" class="w-full h-auto" role="img" aria-label="Balança: o que o benchmark prova contra o que só a sua verificação prova"><defs>
+    <linearGradient id="s2-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#10b981"/></linearGradient>
+    <filter id="s2-glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="1.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <pattern id="s2-grid" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="1.3" cy="1.3" r="1.3" fill="#10b981" opacity="0.14"/></pattern>
+  </defs><rect width="800" height="320" fill="url(#s2-grid)"/>
+      <line x1="400" y1="70" x2="400" y2="270" stroke="#9ca3af" stroke-width="4"/><rect x="320" y="266" width="160" height="12" rx="6" fill="#9ca3af"/>
+      <line x1="180" y1="70" x2="620" y2="70" stroke="#10b981" stroke-width="4" filter="url(#s2-glow)"/>
+      <g class="wf-a"><rect x="80" y="110" width="200" height="110" rx="14" fill="#064e3b" stroke="#10b981" stroke-width="2"/>
+      <line x1="180" y1="70" x2="180" y2="110" stroke="#10b981" stroke-width="2"/>
+      <text x="180" y="142" text-anchor="middle" fill="#34d399" font-family="Inter,sans-serif" font-size="15" font-weight="800">Benchmark prova</text><text x="180" y="166" text-anchor="middle" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="11" font-weight="400">capacidade geral</text><text x="180" y="180" text-anchor="middle" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="11" font-weight="400">custo médio por tarefa</text><text x="180" y="194" text-anchor="middle" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="11" font-weight="400">comparação entre modelos</text></g>
+      <g class="wf-a"><rect x="520" y="110" width="200" height="110" rx="14" fill="#0e1b26" stroke="#38bdf8" stroke-width="2"/>
+      <line x1="620" y1="70" x2="620" y2="110" stroke="#38bdf8" stroke-width="2"/>
+      <text x="620" y="142" text-anchor="middle" fill="#38bdf8" font-family="Inter,sans-serif" font-size="15" font-weight="800">Só você prova</text><text x="620" y="166" text-anchor="middle" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="11" font-weight="400">funciona no seu repo</text><text x="620" y="180" text-anchor="middle" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="11" font-weight="400">o resultado é o que pediu</text><text x="620" y="194" text-anchor="middle" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="11" font-weight="400">nada quebrou fora do escopo</text></g>
+      <text x="400" y="306" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="11" font-style="italic">Balança: o que o benchmark prova contra o que só a sua verificação prova</text></svg>
+        <figcaption class="text-xs text-neutral-400 mt-3 px-1"><strong class="text-emerald-400">O que olhar:</strong> Equilíbrio, não vitória: o benchmark autoriza você a delegar tarefas maiores; ele não substitui a verificação de nenhuma delas.</figcaption>
+      </figure>
+
+      <div class="bg-red-900/20 rounded-xl border border-red-500/30 p-6 mb-6">
+        <h3 class="text-lg font-semibold text-red-400 mb-3 flex items-center"><span class="mr-2">⚠️</span> O erro clássico da primeira semana</h3>
+        <p class="text-neutral-300" data-inema-block="m1-1-p8">Ler "melhor em computer use" e deixar o agente postar, publicar ou pagar sem revisar. Na primeira sessão de teste que serviu de base a este curso, o agente publicou um anúncio com o nome errado do produto. Funcionou; o conteúdo estava errado. Rascunho primeiro, sempre (módulo 1.3).</p>
+      </div>
+      
+      <button type="button" data-inema-read-toggle class="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors flex items-center space-x-2 justify-start">
+        <span class="inema-ico-todo" aria-hidden="true">&#9744;</span>
+        <span class="inema-ico-done" aria-hidden="true">&#9745;</span>
+        <span class="inema-label-todo">Marcar como lido</span>
+        <span class="inema-label-done">Lido</span>
+      </button>
+    </section>
+
+    <!-- TÓPICO 3 -->
+    <section id="topico-3" data-inema-topic="modulo-1-1#topico-3" class="mb-16">
+      <div class="flex items-center space-x-4 mb-6">
+        <span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl">3</span>
+        <h2 class="text-2xl font-bold">🧱 As três superfícies: app, Codex e CLI</h2>
+      </div>
+      <p class="text-neutral-300 mb-6 leading-relaxed" data-inema-block="m1-1-p9">O modelo é um só. O que muda é o harness em volta: quais ferramentas ele tem, onde os arquivos ficam, se a sessão persiste. No ChatGPT comum, o Astra pode não aparecer no seletor. Na área de trabalho do ChatGPT (o modo voltado a tarefas) e no app do Codex, ele aparece após atualizar o app. No CLI, é um valor de configuração.</p>
+
+      <div class="overflow-x-auto rounded-xl border border-dark-600 mb-6">
+        <table class="w-full text-sm text-left">
+          <caption class="text-left text-xs text-neutral-500 px-4 pt-3">Nomes de menu variam por versão; a divisão de responsabilidades não.</caption>
+          <thead class="bg-dark-800 text-emerald-400"><tr><th class="px-4 py-3 font-semibold">Superfície</th><th class="px-4 py-3 font-semibold">Quando usar</th><th class="px-4 py-3 font-semibold">Ferramentas</th><th class="px-4 py-3 font-semibold">Estado</th></tr></thead>
+          <tbody class="divide-y divide-dark-600"><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">ChatGPT (chat)</td><td class="px-4 py-3 text-neutral-300">Pensar, rascunhar prompt, revisar texto</td><td class="px-4 py-3 text-neutral-300">Busca, arquivos anexados</td><td class="px-4 py-3 text-neutral-300">Conversa</td></tr><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">ChatGPT (área de trabalho)</td><td class="px-4 py-3 text-neutral-300">Tarefas com navegador e apps do computador</td><td class="px-4 py-3 text-neutral-300">Computer use via extensão, apps conectados</td><td class="px-4 py-3 text-neutral-300">Conversa fixável</td></tr><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">App do Codex</td><td class="px-4 py-3 text-neutral-300">Projetos com pasta de código, várias sessões em paralelo</td><td class="px-4 py-3 text-neutral-300">Editar, rodar, navegador interno, MCP, skills</td><td class="px-4 py-3 text-neutral-300">Sessão por projeto, fork</td></tr><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">Codex CLI</td><td class="px-4 py-3 text-neutral-300">Terminal, automação, CI, scripts</td><td class="px-4 py-3 text-neutral-300">Tudo do app + `exec` não interativo</td><td class="px-4 py-3 text-neutral-300">Sessão retomável (`resume`)</td></tr></tbody>
+        </table>
+      </div>
+
+      <figure class="rounded-2xl border border-emerald-500/30 bg-dark-900/40 p-3 sm:p-4 mb-6 overflow-hidden">
+        <svg viewBox="0 0 800 340" class="w-full h-auto" role="img" aria-label="Camadas de fora para dentro: superfície (app, Codex, CLI), harness de ferramentas, sessão e projeto, e no centro o modelo GPT-6 Astra"><defs>
+    <linearGradient id="s3-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#10b981"/></linearGradient>
+    <filter id="s3-glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="1.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <pattern id="s3-grid" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="1.3" cy="1.3" r="1.3" fill="#10b981" opacity="0.14"/></pattern>
+  </defs><rect width="800" height="340" fill="url(#s3-grid)"/><g ><rect x="100" y="40" width="600" height="52" rx="12" fill="#0e1b26" stroke="#10b981" stroke-width="1.6" opacity="0.95"/>
+        <text x="400" y="63" text-anchor="middle" fill="#a7f3d0" font-family="Inter,sans-serif" font-size="14" font-weight="700">Superfície</text>
+        <text x="400" y="81" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" font-weight="400">ChatGPT · app Codex · Codex CLI</text></g><g ><rect x="140" y="110" width="520" height="52" rx="12" fill="#0e1b26" stroke="#38bdf8" stroke-width="1.6" opacity="0.95"/>
+        <text x="400" y="133" text-anchor="middle" fill="#9ad6ff" font-family="Inter,sans-serif" font-size="14" font-weight="700">Harness</text>
+        <text x="400" y="151" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" font-weight="400">ferramentas, sandbox, aprovações</text></g><g ><rect x="180" y="180" width="440" height="52" rx="12" fill="#0e1b26" stroke="#10b981" stroke-width="1.6" opacity="0.95"/>
+        <text x="400" y="203" text-anchor="middle" fill="#a7f3d0" font-family="Inter,sans-serif" font-size="14" font-weight="700">Sessão e projeto</text>
+        <text x="400" y="221" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" font-weight="400">pasta, histórico, fork</text></g><g filter="url(#s3-glow)"><rect x="220" y="250" width="360" height="52" rx="12" fill="#064e3b" stroke="url(#s3-g)" stroke-width="2.5" opacity="0.95"/>
+        <text x="400" y="273" text-anchor="middle" fill="#34d399" font-family="Inter,sans-serif" font-size="14" font-weight="700">GPT-6 Astra</text>
+        <text x="400" y="291" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" font-weight="400">o modelo, igual em todas</text></g>
+      <text x="60" y="170" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" transform="rotate(-90 60 170)">de fora para dentro</text></svg>
+        <figcaption class="text-xs text-neutral-400 mt-3 px-1"><strong class="text-emerald-400">O que olhar:</strong> Trocar de superfície não troca o modelo. Troca o que ele pode tocar e o que lembra.</figcaption>
+      </figure>
+
+      <div class="bg-primary/10 rounded-xl border border-primary/30 p-6 mb-6">
+        <h3 class="text-lg font-semibold text-primary mb-3 flex items-center"><span class="mr-2">💡</span> Para quem já usa Claude Code</h3>
+        <p class="text-neutral-300" data-inema-block="m1-1-p10">O mapa é 1:1. App do Codex ≈ Claude Code desktop; Codex CLI ≈ claude no terminal; skills ≈ skills; MCP é o mesmo protocolo. O que você aprendeu de contrato de prompt transfere sem ajuste.</p>
+      </div>
+      
+      <button type="button" data-inema-read-toggle class="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors flex items-center space-x-2 justify-start">
+        <span class="inema-ico-todo" aria-hidden="true">&#9744;</span>
+        <span class="inema-ico-done" aria-hidden="true">&#9745;</span>
+        <span class="inema-label-todo">Marcar como lido</span>
+        <span class="inema-label-done">Lido</span>
+      </button>
+    </section>
+
+    <!-- TÓPICO 4 -->
+    <section id="topico-4" data-inema-topic="modulo-1-1#topico-4" class="mb-16">
+      <div class="flex items-center space-x-4 mb-6">
+        <span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl">4</span>
+        <h2 class="text-2xl font-bold">🧾 O contrato de tarefa em três linhas</h2>
+      </div>
+      <p class="text-neutral-300 mb-6 leading-relaxed" data-inema-block="m1-1-p11">Três linhas. Resultado: o estado final, em uma frase observável. Onde: o arquivo, a URL, a pasta. Prova: o que o agente deve mostrar para você aceitar (saída de comando, screenshot, caminho de arquivo). Uma quarta linha opcional, escopo negativo, evita os efeitos colaterais mais comuns.</p>
+
+      <div class="codebox bg-dark-800 rounded-xl border border-emerald-500/30 overflow-hidden mb-6">
+        <div class="px-5 py-3 border-b border-dark-600 flex items-start justify-between gap-3 flex-wrap">
+          <div><p class="text-xs font-semibold uppercase tracking-wider text-emerald-400 mb-1">Copie e rode</p><p class="text-sm text-neutral-300">Molde de contrato de tarefa. Cole no Codex, preencha os campos entre < ></p></div>
+          <button type="button" data-copy class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors">Copiar</button>
+        </div>
+        <pre class="p-5 text-sm text-neutral-100 bg-dark-900/60 font-mono leading-relaxed"><code class="language-text">Resultado: &lt;o estado final, observável, em uma frase&gt;
+Onde: &lt;pasta do projeto | URL | arquivo&gt;
+Prova: &lt;comando cuja saída eu vou ler | screenshot | caminho do arquivo gerado&gt;
+Não faça: &lt;o que está fora do escopo, ex.: não mude dependências, não faça commit&gt;
+
+Quando terminar, me mostre a prova antes de qualquer outra coisa.</code></pre>
+        <div class="px-5 py-3 border-t border-dark-600 text-sm text-neutral-400"><strong class="text-neutral-300">Como verificar:</strong> A resposta final do agente começa com a prova (saída de comando, screenshot ou caminho), não com um resumo do que ele fez. Se começar com resumo, o contrato não foi lido.</div>
+      </div>
+
+      <div class="codebox bg-dark-800 rounded-xl border border-emerald-500/30 overflow-hidden mb-6">
+        <div class="px-5 py-3 border-b border-dark-600 flex items-start justify-between gap-3 flex-wrap">
+          <div><p class="text-xs font-semibold uppercase tracking-wider text-emerald-400 mb-1">Copie e rode</p><p class="text-sm text-neutral-300">Contrato preenchido: trocar o modelo de um serviço local e confirmar rodando</p></div>
+          <button type="button" data-copy class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors">Copiar</button>
+        </div>
+        <pre class="p-5 text-sm text-neutral-100 bg-dark-900/60 font-mono leading-relaxed"><code class="language-text">Resultado: o serviço em http://localhost:&lt;PORTA&gt; usa o modelo gpt-6-astra na seção Codex.
+Onde: pasta atual (este repositório).
+Prova: saída de `grep -rn "gpt-6-astra" &lt;ARQUIVO_DE_CONFIG&gt;` e um screenshot da página com o modelo selecionado.
+Não faça: não altere outros provedores, não instale dependências, não faça commit.
+
+Quando terminar, me mostre a prova antes de qualquer outra coisa.</code></pre>
+        <div class="px-5 py-3 border-t border-dark-600 text-sm text-neutral-400"><strong class="text-neutral-300">Como verificar:</strong> O grep devolve ao menos uma linha com o modelo novo e o screenshot mostra o seletor. Abra a página você mesmo antes de aceitar.</div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div class="bg-emerald-900/20 rounded-xl border border-emerald-500/30 p-6">
+          <h4 class="font-bold text-emerald-400 mb-4">&#10003; Prova aceitável</h4>
+          <ul class="space-y-3 text-neutral-300"><li class="flex items-start space-x-2"><span class="text-emerald-400">&#10003;</span><span>Saída literal de um comando que você pode rodar de novo</span></li><li class="flex items-start space-x-2"><span class="text-emerald-400">&#10003;</span><span>Screenshot da tela final com o valor visível</span></li><li class="flex items-start space-x-2"><span class="text-emerald-400">&#10003;</span><span>Caminho de arquivo que você abre e confere</span></li><li class="flex items-start space-x-2"><span class="text-emerald-400">&#10003;</span><span>Diff resumido com os arquivos tocados</span></li></ul>
+        </div>
+        <div class="bg-red-900/20 rounded-xl border border-red-500/30 p-6">
+          <h4 class="font-bold text-red-400 mb-4">&#10007; Prova que não prova</h4>
+          <ul class="space-y-3 text-neutral-300"><li class="flex items-start space-x-2"><span class="text-red-400">&#10007;</span><span>"Feito, o modelo foi trocado com sucesso"</span></li><li class="flex items-start space-x-2"><span class="text-red-400">&#10007;</span><span>"Testei e está funcionando"</span></li><li class="flex items-start space-x-2"><span class="text-red-400">&#10007;</span><span>Resumo dos passos executados sem saída</span></li><li class="flex items-start space-x-2"><span class="text-red-400">&#10007;</span><span>Promessa de que "deve funcionar"</span></li></ul>
+        </div>
+      </div>
+      
+      <button type="button" data-inema-read-toggle class="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors flex items-center space-x-2 justify-start">
+        <span class="inema-ico-todo" aria-hidden="true">&#9744;</span>
+        <span class="inema-ico-done" aria-hidden="true">&#9745;</span>
+        <span class="inema-label-todo">Marcar como lido</span>
+        <span class="inema-label-done">Lido</span>
+      </button>
+    </section>
+
+    <!-- TÓPICO 5 -->
+    <section id="topico-5" data-inema-topic="modulo-1-1#topico-5" class="mb-16">
+      <div class="flex items-center space-x-4 mb-6">
+        <span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl">5</span>
+        <h2 class="text-2xl font-bold">🧭 Onde as coisas somem: sessões, projetos e pin</h2>
+      </div>
+      <p class="text-neutral-300 mb-6 leading-relaxed" data-inema-block="m1-1-p12">Rodando várias tarefas ao mesmo tempo (troca de modelo, redesign de UI, vídeo, jogo), a barra lateral do app do Codex reorganiza a lista e uma conversa recém-criada parece ter sumido. Ela está em "recentes" ou dentro do projeto. A rotina: toda sessão que vai durar mais de uma resposta recebe pin na hora em que é criada; toda mudança arriscada nasce de um fork da sessão estável, não da própria.</p>
+
+      <div class="space-y-5 mb-6">
+        <h3 class="text-lg font-semibold text-emerald-400 mb-2">Rotina de organização</h3>
+        
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center"><span class="text-emerald-400 font-bold">1</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Um projeto por pasta de código</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m1-1-p13">Crie o projeto apontando para a pasta. Sessões daquele projeto herdam a pasta e as instruções dela (AGENTS.md).</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center"><span class="text-emerald-400 font-bold">2</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Pin na criação</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m1-1-p14">Antes de mandar o primeiro prompt longo, fixe a sessão. Desfixe quando a tarefa fechar.</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center"><span class="text-emerald-400 font-bold">3</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Fork para experimentos</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m1-1-p15">Redesign, migração, refatoração grande: fork da sessão que está funcionando. Se der errado, a original continua intacta.</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center"><span class="text-emerald-400 font-bold">4</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Nomeie pelo resultado</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m1-1-p16">"trocar modelo → astra", "UI v2", "vídeo promo remotion". Nomes por resultado são buscáveis; "nova conversa 7" não é.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="codebox bg-dark-800 rounded-xl border border-emerald-500/30 overflow-hidden mb-6">
+        <div class="px-5 py-3 border-b border-dark-600 flex items-start justify-between gap-3 flex-wrap">
+          <div><p class="text-xs font-semibold uppercase tracking-wider text-emerald-400 mb-1">Copie e rode</p><p class="text-sm text-neutral-300">No CLI: retomar a última sessão e criar um fork dela para um experimento</p></div>
+          <button type="button" data-copy class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors">Copiar</button>
+        </div>
+        <pre class="p-5 text-sm text-neutral-100 bg-dark-900/60 font-mono leading-relaxed"><code class="language-bash"># retoma a sessão mais recente deste projeto
+codex resume --last
+
+# abre um fork da sessão mais recente (a original fica intacta)
+codex fork --last
+
+# lista as sessões do daemon local (quando o app-server está ativo)
+codex agents</code></pre>
+        <div class="px-5 py-3 border-t border-dark-600 text-sm text-neutral-400"><strong class="text-neutral-300">Como verificar:</strong> O fork abre com o histórico da sessão original. Faça uma mudança no fork, volte à original com `codex resume` e confirme que ela não tem a mudança.</div>
+      </div>
+
+      <div class="bg-primary/10 rounded-xl border border-primary/30 p-6 mb-6">
+        <h3 class="text-lg font-semibold text-primary mb-3 flex items-center"><span class="mr-2">💡</span> Conversa sumiu?</h3>
+        <p class="text-neutral-300" data-inema-block="m1-1-p17">Antes de recriar: barra lateral → recentes, depois o projeto. Recriar a sessão perde o contexto que o agente já construiu sobre o projeto e custa tokens de novo.</p>
+      </div>
+      
+      <button type="button" data-inema-read-toggle class="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors flex items-center space-x-2 justify-start">
+        <span class="inema-ico-todo" aria-hidden="true">&#9744;</span>
+        <span class="inema-ico-done" aria-hidden="true">&#9745;</span>
+        <span class="inema-label-todo">Marcar como lido</span>
+        <span class="inema-label-done">Lido</span>
+      </button>
+    </section>
+
+    <!-- TÓPICO 6 -->
+    <section id="topico-6" data-inema-topic="modulo-1-1#topico-6" class="mb-16">
+      <div class="flex items-center space-x-4 mb-6">
+        <span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl">6</span>
+        <h2 class="text-2xl font-bold">🗺️ Mapa do curso e o que você vai construir</h2>
+      </div>
+      
+      <figure class="rounded-2xl border border-emerald-500/30 bg-dark-900/40 p-3 sm:p-4 mb-6 overflow-hidden">
+        <svg viewBox="0 0 800 514" class="w-full h-auto" role="img" aria-label="Um sistema de trabalho com o Astra se ramifica em superfícies, contrato, computer use, iteração, skills, MCP, cota e memória"><defs>
+    <linearGradient id="s4-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#10b981"/></linearGradient>
+    <filter id="s4-glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="1.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <pattern id="s4-grid" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="1.3" cy="1.3" r="1.3" fill="#10b981" opacity="0.14"/></pattern>
+  </defs><rect width="800" height="514" fill="url(#s4-grid)"/>
+      <g filter="url(#s4-glow)"><circle cx="130" cy="257" r="88" fill="#064e3b" stroke="url(#s4-g)" stroke-width="2.5"/></g>
+      <text x="130" y="249" text-anchor="middle" fill="#34d399" font-family="Inter,sans-serif" font-size="15" font-weight="800">Sistema</text><text x="130" y="267" text-anchor="middle" fill="#34d399" font-family="Inter,sans-serif" font-size="15" font-weight="800">de trabalho</text><text x="130" y="285" text-anchor="middle" fill="#34d399" font-family="Inter,sans-serif" font-size="15" font-weight="800">com o Astra</text><path d="M220 257 C 255 257, 255 53.857142857142854, 380 53.857142857142854" fill="none" stroke="#10b981" stroke-width="1.6" stroke-dasharray="5 5" opacity="0.6"/>
+        <g class="wf-a"><rect x="380" y="29.857142857142854" width="400" height="48" rx="10" fill="#064e3b" stroke="#10b981" stroke-width="1.6"/>
+        <text x="420" y="59.857142857142854" text-anchor="middle" fill="#34d399" font-family="Inter,sans-serif" font-size="18" font-weight="800">+1</text>
+        <text x="454" y="50.857142857142854" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="11.5" font-weight="600">1.2 Ativar nas três superfícies</text>
+        <text x="454" y="66.85714285714286" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5">app, Codex, CLI, config.toml</text></g><path d="M220 257 C 255 257, 255 121.57142857142856, 380 121.57142857142856" fill="none" stroke="#38bdf8" stroke-width="1.6" stroke-dasharray="5 5" opacity="0.6"/>
+        <g class="wf-a"><rect x="380" y="97.57142857142856" width="400" height="48" rx="10" fill="#0e1b26" stroke="#38bdf8" stroke-width="1.6"/>
+        <text x="420" y="127.57142857142856" text-anchor="middle" fill="#38bdf8" font-family="Inter,sans-serif" font-size="18" font-weight="800">+1</text>
+        <text x="454" y="118.57142857142856" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="11.5" font-weight="600">1.3 Computer use no navegador</text>
+        <text x="454" y="134.57142857142856" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5">extensão, rascunho, permissões</text></g><path d="M220 257 C 255 257, 255 189.28571428571428, 380 189.28571428571428" fill="none" stroke="#10b981" stroke-width="1.6" stroke-dasharray="5 5" opacity="0.6"/>
+        <g class="wf-a"><rect x="380" y="165.28571428571428" width="400" height="48" rx="10" fill="#064e3b" stroke="#10b981" stroke-width="1.6"/>
+        <text x="420" y="195.28571428571428" text-anchor="middle" fill="#34d399" font-family="Inter,sans-serif" font-size="18" font-weight="800">+1</text>
+        <text x="454" y="186.28571428571428" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="11.5" font-weight="600">1.4 Codar, iterar, rollback</text>
+        <text x="454" y="202.28571428571428" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5">trocar modelo, refatorar UI, git</text></g><path d="M220 257 C 255 257, 255 256.99999999999994, 380 256.99999999999994" fill="none" stroke="#38bdf8" stroke-width="1.6" stroke-dasharray="5 5" opacity="0.6"/>
+        <g class="wf-a"><rect x="380" y="232.99999999999994" width="400" height="48" rx="10" fill="#0e1b26" stroke="#38bdf8" stroke-width="1.6"/>
+        <text x="420" y="262.99999999999994" text-anchor="middle" fill="#38bdf8" font-family="Inter,sans-serif" font-size="18" font-weight="800">+1</text>
+        <text x="454" y="253.99999999999994" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="11.5" font-weight="600">2.1 Skills e biblioteca de gosto</text>
+        <text x="454" y="269.99999999999994" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5">Remotion, SKILL.md, design guide</text></g><path d="M220 257 C 255 257, 255 324.71428571428567, 380 324.71428571428567" fill="none" stroke="#10b981" stroke-width="1.6" stroke-dasharray="5 5" opacity="0.6"/>
+        <g class="wf-a"><rect x="380" y="300.71428571428567" width="400" height="48" rx="10" fill="#064e3b" stroke="#10b981" stroke-width="1.6"/>
+        <text x="420" y="330.71428571428567" text-anchor="middle" fill="#34d399" font-family="Inter,sans-serif" font-size="18" font-weight="800">+1</text>
+        <text x="454" y="321.71428571428567" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="11.5" font-weight="600">2.2 MCP e trabalhos longos</text>
+        <text x="454" y="337.71428571428567" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5">Blender MCP, continue, reinício</text></g><path d="M220 257 C 255 257, 255 392.4285714285714, 380 392.4285714285714" fill="none" stroke="#38bdf8" stroke-width="1.6" stroke-dasharray="5 5" opacity="0.6"/>
+        <g class="wf-a"><rect x="380" y="368.4285714285714" width="400" height="48" rx="10" fill="#0e1b26" stroke="#38bdf8" stroke-width="1.6"/>
+        <text x="420" y="398.4285714285714" text-anchor="middle" fill="#38bdf8" font-family="Inter,sans-serif" font-size="18" font-weight="800">+1</text>
+        <text x="454" y="389.4285714285714" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="11.5" font-weight="600">2.3 Cota, custo, orquestração</text>
+        <text x="454" y="405.4285714285714" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5">medidor, modelo barato, exec</text></g><path d="M220 257 C 255 257, 255 460.14285714285705, 380 460.14285714285705" fill="none" stroke="#10b981" stroke-width="1.6" stroke-dasharray="5 5" opacity="0.6"/>
+        <g class="wf-a"><rect x="380" y="436.14285714285705" width="400" height="48" rx="10" fill="#064e3b" stroke="#10b981" stroke-width="1.6"/>
+        <text x="420" y="466.14285714285705" text-anchor="middle" fill="#34d399" font-family="Inter,sans-serif" font-size="18" font-weight="800">+1</text>
+        <text x="454" y="457.14285714285705" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="11.5" font-weight="600">2.4 Memória compartilhada</text>
+        <text x="454" y="473.14285714285705" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5">Obsidian, AGENTS.md, sistema</text></g></svg>
+        <figcaption class="text-xs text-neutral-400 mt-3 px-1"><strong class="text-emerald-400">O que olhar:</strong> Cada ramo é um módulo. O centro é o que você tem no fim: um sistema em que o Astra planeja e executa, e ferramentas mais baratas fazem o volume.</figcaption>
+      </figure>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        
+        <div class="bg-dark-800 rounded-xl border border-dark-600 p-5">
+          <div class="text-2xl mb-2">🧭</div>
+          <h4 class="font-semibold text-emerald-400 mb-2">Trilha 1: operar</h4>
+          <p class="text-neutral-300 text-sm" data-inema-block="m1-1-p18">Ativar, delegar com contrato, usar o navegador com segurança, iterar num projeto com rollback. Sai com o loop funcionando.</p>
+        </div>
+        <div class="bg-dark-800 rounded-xl border border-dark-600 p-5">
+          <div class="text-2xl mb-2">🛠️</div>
+          <h4 class="font-semibold text-emerald-400 mb-2">Trilha 2: escalar</h4>
+          <p class="text-neutral-300 text-sm" data-inema-block="m1-1-p19">Ensinar o agente (skills), conectar ferramentas (MCP), controlar cota e custo, e dar memória comum aos agentes. Sai com o sistema.</p>
+        </div>
+        <div class="bg-dark-800 rounded-xl border border-dark-600 p-5">
+          <div class="text-2xl mb-2">🖱️</div>
+          <h4 class="font-semibold text-emerald-400 mb-2">Aprofundamento</h4>
+          <p class="text-neutral-300 text-sm" data-inema-block="m1-1-p20">Computer use em cinco fluxos completos está no curso irmão <a href="https://inematds.github.io/astra-computer-use/" target="_blank" class="text-sky-400 hover:text-sky-300 underline decoration-dotted">Computer Use com o GPT-6 Astra</a>. Aqui você vê o essencial para operar com segurança.</p>
+        </div>
+      </div>
+<p class="text-neutral-300 mb-6 leading-relaxed" data-inema-block="m1-1-p21">Os prompts e comandos foram conferidos no Codex CLI 0.153 e no app do Codex em setembro de 2026. Menus mudam; o contrato e o loop não.</p>
+      
+      <button type="button" data-inema-read-toggle class="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors flex items-center space-x-2 justify-start">
+        <span class="inema-ico-todo" aria-hidden="true">&#9744;</span>
+        <span class="inema-ico-done" aria-hidden="true">&#9745;</span>
+        <span class="inema-label-todo">Marcar como lido</span>
+        <span class="inema-label-done">Lido</span>
+      </button>
+    </section>
+
+    <!-- QUIZ -->
+    
+      <div class="bg-dark-800 rounded-2xl border border-emerald-500/30 p-6 mb-6">
+        <h3 class="text-lg font-semibold text-emerald-400 mb-1 flex items-center"><span class="mr-2">🧪</span> Teste rápido do módulo</h3>
+        <p class="text-sm text-neutral-400 mb-5">Três perguntas. Clique numa opção para ver a resposta.</p>
+        <div class="space-y-5">
+        
+          <div class="qz" data-q="1">
+            <p class="font-semibold text-neutral-100 mb-3">1. Qual pedido aproveita o que o Astra tem de novo?</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-emerald-500/40 transition-colors" data-ok="0">"Qual arquivo tem a configuração do modelo?"</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-emerald-500/40 transition-colors" data-ok="1">"Troque o modelo para gpt-6-astra, reinicie e confirme abrindo a página."</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-emerald-500/40 transition-colors" data-ok="0">"Escreva uma função que leia o config."</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-emerald-500/40 transition-colors" data-ok="0">"Melhore o app."</button>
+            </div>
+            <p class="qz-fb mt-3 text-sm text-neutral-300" data-text="É a tarefa inteira com critério de pronto observável. As outras são pedaços ou não têm como terminar."></p>
+          </div>
+          <div class="qz" data-q="2">
+            <p class="font-semibold text-neutral-100 mb-3">2. O que um benchmark de computer use prova sobre o seu projeto?</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-emerald-500/40 transition-colors" data-ok="0">Que o agente vai acertar no seu app</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-emerald-500/40 transition-colors" data-ok="0">Que o custo será baixo no seu caso</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-emerald-500/40 transition-colors" data-ok="1">Nada direto: autoriza delegar mais, não dispensa verificar</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-emerald-500/40 transition-colors" data-ok="0">Que rollback não é necessário</button>
+            </div>
+            <p class="qz-fb mt-3 text-sm text-neutral-300" data-text="Benchmark mede tarefas de laboratório com critério do avaliador. O seu critério só existe quando você escreve."></p>
+          </div>
+          <div class="qz" data-q="3">
+            <p class="font-semibold text-neutral-100 mb-3">3. Qual das opções é uma prova de conclusão aceitável?</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-emerald-500/40 transition-colors" data-ok="0">"Feito com sucesso"</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-emerald-500/40 transition-colors" data-ok="0">Resumo dos passos executados</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-emerald-500/40 transition-colors" data-ok="1">Saída literal de um comando que você pode rodar de novo</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-emerald-500/40 transition-colors" data-ok="0">"Deve estar funcionando"</button>
+            </div>
+            <p class="qz-fb mt-3 text-sm text-neutral-300" data-text="Prova é algo que você reproduz ou vê. Texto do agente sobre o próprio trabalho não é prova."></p>
+          </div>
+        </div>
+      </div>
+
+    <!-- RESUMO DO MÓDULO -->
+    <section class="mb-12">
+      <div class="bg-gradient-to-br from-emerald-900/40 via-dark-800 to-dark-800 rounded-xl border border-emerald-500/30 p-8">
+        <h2 class="text-2xl font-bold mb-6 flex items-center"><span class="mr-3">📋</span> Resumo do módulo</h2>
+        <div class="space-y-4 mb-8">
+          <div class="flex items-start space-x-3"><span class="text-emerald-400 mt-1">&#10003;</span><div><strong class="text-white">A unidade cresceu</strong><span class="text-neutral-400"> - delegue a tarefa inteira com critério de pronto, não o passo.</span></div></div><div class="flex items-start space-x-3"><span class="text-emerald-400 mt-1">&#10003;</span><div><strong class="text-white">Benchmarks autorizam, não dispensam</strong><span class="text-neutral-400"> - delegue mais; verifique tudo.</span></div></div><div class="flex items-start space-x-3"><span class="text-emerald-400 mt-1">&#10003;</span><div><strong class="text-white">Três superfícies, um modelo</strong><span class="text-neutral-400"> - chat para pensar, Codex para projetos, CLI para automatizar.</span></div></div><div class="flex items-start space-x-3"><span class="text-emerald-400 mt-1">&#10003;</span><div><strong class="text-white">Contrato de três linhas</strong><span class="text-neutral-400"> - resultado, onde, prova. Prova vem antes do resumo.</span></div></div><div class="flex items-start space-x-3"><span class="text-emerald-400 mt-1">&#10003;</span><div><strong class="text-white">Pin e fork</strong><span class="text-neutral-400"> - toda sessão longa fixada na criação; todo experimento nasce de um fork.</span></div></div>
+        </div>
+        <div class="bg-dark-800/50 rounded-lg p-4 mb-8"><h3 class="font-semibold text-emerald-400 mb-2">Próximo módulo:</h3><p class="text-neutral-300">1.2 - Ativando: app, Codex e CLI</p></div>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a href="index.html" class="flex-1 text-center px-6 py-3 bg-dark-700 text-neutral-300 rounded-lg font-semibold hover:bg-dark-600 transition-colors">&#8592; Voltar para a trilha</a>
+          <a href="modulo-1-2.html" class="flex-1 text-center px-6 py-3 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-500 transition-colors">Próximo módulo &#8594;</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-dark-600 mt-16 py-8">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-neutral-500 text-sm space-y-2">
+      <p>GPT-6 Astra: operação técnica · Trilha 1 — Setup e operação · 2026 ·
+        <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300">INEMA.CLUB</a> -
+        <a href="https://inema.pro" target="_blank" class="text-amber-700 dark:text-slate-300">PRO</a></p>
+      <p class="text-xs">Fontes: <a href="https://openai.com/index/gpt-6-astra/" target="_blank" class="text-sky-400 hover:text-sky-300">página de lançamento do GPT-6 Astra</a> (OpenAI) · <a href="https://developers.openai.com/codex/" target="_blank" class="text-sky-400 hover:text-sky-300">documentação do Codex</a> · <a href="https://www.remotion.dev/" target="_blank" class="text-sky-400 hover:text-sky-300">Remotion</a> · <a href="https://github.com/ahujasid/blender-mcp" target="_blank" class="text-sky-400 hover:text-sky-300">Blender MCP</a> · <a href="https://obsidian.md/" target="_blank" class="text-sky-400 hover:text-sky-300">Obsidian</a>. Comandos conferidos no Codex CLI 0.153 (set/2026). Versão leiga deste conteúdo: <a href="https://inematds.github.io/gpt6-astra/" target="_blank" class="text-sky-400 hover:text-sky-300">GPT-6 Astra na prática</a>.</p>
+    </div>
+  </footer>
+
+  <!-- SCRIPTS núcleo v1 -->
+  <script>
+    function toggleTopic(button) {
+      const topicItem = button.closest('.topic-item');
+      const explanation = topicItem.querySelector('.topic-explanation');
+      const moduleCard = button.closest('.bg-dark-800');
+      if (moduleCard) {
+        moduleCard.querySelectorAll('.topic-explanation.active').forEach(exp => {
+          if (exp !== explanation) { exp.classList.remove('active'); const b = exp.parentElement.querySelector('[aria-controls="' + exp.id + '"]'); if (b) b.setAttribute('aria-expanded', 'false'); }
+        });
+      }
+      const isOpen = explanation.classList.toggle('active');
+      button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    }
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+    const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+    const html = document.documentElement;
+    if (!html.classList.contains('dark')) { themeToggleDarkIcon.classList.remove('hidden'); } else { themeToggleLightIcon.classList.remove('hidden'); }
+    themeToggle.addEventListener('click', () => {
+      themeToggleDarkIcon.classList.toggle('hidden');
+      themeToggleLightIcon.classList.toggle('hidden');
+      html.classList.toggle('dark');
+      const dark = html.classList.contains('dark');
+      localStorage.setItem('theme', dark ? 'dark' : 'light');
+      if (window.INEMA && INEMA.setPref) { try { INEMA.setPref('theme', dark ? 'inema-dark' : 'claro'); } catch (e) {} }
+    });
+    function openModal(modalId) { const m = document.getElementById(modalId); if (m) { m.classList.remove('hidden'); document.body.style.overflow = 'hidden'; } }
+    function closeModal() { document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden')); document.body.style.overflow = 'auto'; }
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+    // Quiz inline (3 perguntas por módulo)
+    document.addEventListener('click', (e) => {
+      const opt = e.target.closest('.qz-opt'); if (!opt) return;
+      const qz = opt.closest('.qz'); if (!qz || qz.hasAttribute('data-answered')) return;
+      const ok = opt.getAttribute('data-ok') === '1';
+      qz.querySelectorAll('.qz-opt').forEach(o => { o.setAttribute('data-state', o.getAttribute('data-ok') === '1' ? 'ok' : (o === opt ? 'no' : '')); o.disabled = true; });
+      qz.setAttribute('data-answered', ok ? 'ok' : 'no');
+      const fb = qz.querySelector('.qz-fb'); if (fb) fb.textContent = (ok ? '✓ Certo. ' : '✗ Não é essa. ') + (fb.getAttribute('data-text') || '');
+    });
+    // Copiar código
+    document.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-copy]'); if (!b) return;
+      const pre = b.closest('.codebox').querySelector('pre');
+      navigator.clipboard && navigator.clipboard.writeText(pre.innerText).then(() => { const t = b.textContent; b.textContent = 'Copiado ✓'; setTimeout(() => b.textContent = t, 1600); });
+    });
+  </script>
+
+  <script src="../../assets/learn.js"></script>
+  <script>
+    if (window.INEMA && typeof window.INEMA.init === 'function') { window.INEMA.init(); }
+  </script>
+</body>
+</html>

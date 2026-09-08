@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="inema-course" content="gpt6astratec">
+  <title>Computer use no navegador | GPT-6 Astra: operação técnica</title>
+  <meta name="description" content="Com a extensão do ChatGPT no navegador, o Astra abre sites, preenche formulários e publica. Na primeira sessão de teste ele postou um anúncio com o nome errado do produto: executou perfeitamente o pedido errado. Este módulo monta o fluxo que impede isso: extensão, rascunho antes de publicar, permissões e prova.">
+
+  <!-- ANTI-FOUC: bloqueante, antes de tudo -->
+  <script>
+(function () {
+  try {
+    var html = document.documentElement;
+    var DEF = { theme: 'inema-dark', font: 'inter', fontScale: 100, lineWidth: 68, leading: 1.7, accent: 'emerald' };
+    function clone(o) { var r = {}; for (var x in o) r[x] = o[x]; return r; }
+    var p = clone(DEF);
+    try {
+      var raw = localStorage.getItem('inema.prefs');
+      if (raw) { var parsed = JSON.parse(raw); if (parsed && typeof parsed === 'object') { for (var k in DEF) if (parsed[k] != null) p[k] = parsed[k]; } }
+      else { var legacy = localStorage.getItem('theme'); if (legacy === 'light') p.theme = 'claro'; else if (legacy === 'dark') p.theme = 'inema-dark'; }
+    } catch (e) { p = clone(DEF); }
+    var THEMES = { 'inema-dark': { dark: true, attr: null, cs: 'dark' }, 'claro': { dark: false, attr: null, cs: 'light' }, 'sepia': { dark: false, attr: 'sepia', cs: 'light' }, 'foco': { dark: null, attr: 'foco', cs: null }, 'contraste': { dark: true, attr: 'contraste', cs: 'dark' } };
+    var t = THEMES[p.theme] || THEMES['inema-dark'];
+    if (t.dark === true) html.classList.add('dark'); else if (t.dark === false) html.classList.remove('dark');
+    if (t.attr) html.setAttribute('data-theme', t.attr); else html.removeAttribute('data-theme');
+    html.style.colorScheme = (t.cs ? t.cs : (html.classList.contains('dark') ? 'dark' : 'light'));
+    html.setAttribute('data-font', p.font || 'inter'); html.setAttribute('data-accent', p.accent || 'emerald');
+    var s = html.style; var scale = (+p.fontScale || 100);
+    s.setProperty('--inema-font-scale', (scale / 100).toString()); s.setProperty('font-size', scale + '%');
+    s.setProperty('--measure', (+p.lineWidth || 68) + 'ch'); s.setProperty('--lh-body', (+p.leading || 1.7).toString());
+    var fam = p.font === 'system' ? 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif' : (p.font === 'leitura' ? '"Atkinson Hyperlegible", "Inter", system-ui, sans-serif' : '"Inter", system-ui, sans-serif');
+    s.setProperty('--font-body', fam);
+    var ACC = { emerald: [152, 76, 45], blue: [217, 91, 60], purple: [258, 90, 66], amber: [38, 92, 50], teal: [174, 72, 41], rose: [350, 89, 60] };
+    var a = ACC[p.accent] || ACC.emerald;
+    s.setProperty('--accent-h', a[0] + ''); s.setProperty('--accent-s', a[1] + '%'); s.setProperty('--accent-l', a[2] + '%');
+    s.setProperty('--accent', 'hsl(' + a[0] + ' ' + a[1] + '% ' + a[2] + '%)');
+  } catch (err) { try { document.documentElement.classList.add('dark'); document.documentElement.style.colorScheme = 'dark'; } catch (e) {} }
+})();
+</script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class', theme: { extend: { colors: { primary: '#FACC15', dark: { 900: '#111827', 800: '#1f2937', 700: '#374151', 600: '#4b5563' } } } } }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/learn.css">
+
+  <!-- Manifesto do curso (obrigatório em toda página) -->
+  <script type="application/json" data-inema-manifest>
+{
+ "course": "gpt6astratec",
+ "tracks": [
+  {
+   "n": "1",
+   "title": "Setup e operação",
+   "modules": [
+    {
+     "id": "1-1",
+     "title": "O que o Astra muda no loop de trabalho",
+     "topics": 6,
+     "href": "curso/trilha1/modulo-1-1.html"
+    },
+    {
+     "id": "1-2",
+     "title": "Ativando: app, Codex e CLI",
+     "topics": 6,
+     "href": "curso/trilha1/modulo-1-2.html"
+    },
+    {
+     "id": "1-3",
+     "title": "Computer use no navegador",
+     "topics": 6,
+     "href": "curso/trilha1/modulo-1-3.html"
+    },
+    {
+     "id": "1-4",
+     "title": "Codar com o Astra: trocar, refatorar, rollback",
+     "topics": 6,
+     "href": "curso/trilha1/modulo-1-4.html"
+    }
+   ]
+  },
+  {
+   "n": "2",
+   "title": "Construir e escalar",
+   "modules": [
+    {
+     "id": "2-1",
+     "title": "Skills: ensinar a ferramenta e o gosto",
+     "topics": 6,
+     "href": "curso/trilha2/modulo-2-1.html"
+    },
+    {
+     "id": "2-2",
+     "title": "MCP e trabalhos longos",
+     "topics": 6,
+     "href": "curso/trilha2/modulo-2-2.html"
+    },
+    {
+     "id": "2-3",
+     "title": "Cota, custo e orquestração",
+     "topics": 6,
+     "href": "curso/trilha2/modulo-2-3.html"
+    },
+    {
+     "id": "2-4",
+     "title": "Memória compartilhada e o sistema completo",
+     "topics": 6,
+     "href": "curso/trilha2/modulo-2-4.html"
+    }
+   ]
+  }
+ ]
+}
+  </script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .dark body { background-color: #111827; }
+    .topic-explanation { display: none; }
+    .topic-explanation.active { display: block; }
+    html { scroll-behavior: smooth; }
+    [id] { scroll-margin-top: 5rem; }
+
+    /* Light mode overrides */
+    html:not(.dark) body { background-color: #f8fafc; }
+    html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+    html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+    html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+    html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+    html:not(.dark) .bg-dark-800\/50, html:not(.dark) .bg-dark-800\/60, html:not(.dark) .bg-dark-900\/40, html:not(.dark) .bg-dark-900\/60 { background-color: #f3f4f6; }
+    html:not(.dark) .text-neutral-100 { color: #111827; }
+    html:not(.dark) .text-white { color: #111827; }
+    html:not(.dark) .text-neutral-300 { color: #4b5563; }
+    html:not(.dark) .text-neutral-400 { color: #6b7280; }
+    html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+    html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+    html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+    
+    html:not(.dark) .text-emerald-400 { color: #059669; }
+    html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5, 150, 105, 0.12); }
+    html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5, 150, 105, 0.08); }
+    html:not(.dark) .bg-emerald-900\/20 { background-color: rgba(5, 150, 105, 0.07); }
+    html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5, 150, 105, 0.25); }
+    html:not(.dark) .hover\:bg-emerald-500\/30:hover { background-color: rgba(5, 150, 105, 0.18); }
+    html:not(.dark) .hover\:text-emerald-400:hover { color: #059669; }
+    html:not(.dark) .hover\:bg-emerald-500\/10:hover { background-color: rgba(5, 150, 105, 0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-emerald-400 { color: #059669; }
+
+    html:not(.dark) .text-blue-400 { color: #2563eb; }
+    html:not(.dark) .bg-blue-500\/20 { background-color: rgba(37, 99, 235, 0.12); }
+    html:not(.dark) .bg-blue-500\/10 { background-color: rgba(37, 99, 235, 0.08); }
+    html:not(.dark) .bg-blue-900\/20 { background-color: rgba(37, 99, 235, 0.07); }
+    html:not(.dark) .border-blue-500\/30 { border-color: rgba(37, 99, 235, 0.25); }
+    html:not(.dark) .hover\:bg-blue-500\/30:hover { background-color: rgba(37, 99, 235, 0.18); }
+    html:not(.dark) .hover\:text-blue-400:hover { color: #2563eb; }
+    html:not(.dark) .hover\:bg-blue-500\/10:hover { background-color: rgba(37, 99, 235, 0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-blue-400 { color: #2563eb; }
+
+    html:not(.dark) .text-purple-400 { color: #7c3aed; }
+    html:not(.dark) .bg-purple-500\/20 { background-color: rgba(124, 58, 237, 0.12); }
+    html:not(.dark) .bg-purple-500\/10 { background-color: rgba(124, 58, 237, 0.08); }
+    html:not(.dark) .bg-purple-900\/20 { background-color: rgba(124, 58, 237, 0.07); }
+    html:not(.dark) .border-purple-500\/30 { border-color: rgba(124, 58, 237, 0.25); }
+    html:not(.dark) .hover\:bg-purple-500\/30:hover { background-color: rgba(124, 58, 237, 0.18); }
+    html:not(.dark) .hover\:text-purple-400:hover { color: #7c3aed; }
+    html:not(.dark) .hover\:bg-purple-500\/10:hover { background-color: rgba(124, 58, 237, 0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-purple-400 { color: #7c3aed; }
+
+    html:not(.dark) .text-amber-400 { color: #92400e; }
+    html:not(.dark) .bg-amber-500\/20 { background-color: rgba(146, 64, 14, 0.12); }
+    html:not(.dark) .bg-amber-500\/10 { background-color: rgba(146, 64, 14, 0.08); }
+    html:not(.dark) .bg-amber-900\/20 { background-color: rgba(146, 64, 14, 0.07); }
+    html:not(.dark) .border-amber-500\/30 { border-color: rgba(146, 64, 14, 0.25); }
+    html:not(.dark) .hover\:bg-amber-500\/30:hover { background-color: rgba(146, 64, 14, 0.18); }
+    html:not(.dark) .hover\:text-amber-400:hover { color: #92400e; }
+    html:not(.dark) .hover\:bg-amber-500\/10:hover { background-color: rgba(146, 64, 14, 0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-amber-400 { color: #92400e; }
+
+    html:not(.dark) .text-red-400 { color: #b91c1c; }
+    html:not(.dark) .bg-red-500\/20 { background-color: rgba(185, 28, 28, 0.12); }
+    html:not(.dark) .bg-red-500\/10 { background-color: rgba(185, 28, 28, 0.08); }
+    html:not(.dark) .bg-red-900\/20 { background-color: rgba(185, 28, 28, 0.07); }
+    html:not(.dark) .border-red-500\/30 { border-color: rgba(185, 28, 28, 0.25); }
+    html:not(.dark) .hover\:bg-red-500\/30:hover { background-color: rgba(185, 28, 28, 0.18); }
+    html:not(.dark) .hover\:text-red-400:hover { color: #b91c1c; }
+    html:not(.dark) .hover\:bg-red-500\/10:hover { background-color: rgba(185, 28, 28, 0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-red-400 { color: #b91c1c; }
+    html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+    html:not(.dark) .text-primary { color: #a16207; }
+    html:not(.dark) .bg-primary\/10 { background-color: rgba(161, 98, 7, 0.08); }
+    html:not(.dark) .border-primary\/30 { border-color: rgba(161, 98, 7, 0.25); }
+    html:not(.dark) .text-sky-400 { color: #0369a1; }
+    html:not(.dark) .text-yellow-400 { color: #a16207; }
+    html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+    html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+    html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95); }
+    html:not(.dark) .text-amber-700 { color: #92400e; }
+
+    /* Dark mode - bordas suaves */
+    .dark .border-dark-600 { border-color: #374151; }
+    .dark .divide-dark-600 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+
+    /* SVG */
+    html:not(.dark) svg[role="img"] { filter: saturate(0.82) brightness(0.96); }
+    @keyframes wf-pulse { 0%,100% { opacity:.55 } 50% { opacity:1 } }
+    @keyframes wf-flow { to { stroke-dashoffset: -28; } }
+    @media (prefers-reduced-motion: no-preference) {
+      .wf-a { animation: wf-pulse 2.6s ease-in-out infinite; }
+      .wf-a:nth-child(2){animation-delay:.25s} .wf-a:nth-child(3){animation-delay:.5s}
+      .wf-a:nth-child(4){animation-delay:.75s} .wf-a:nth-child(5){animation-delay:1s} .wf-a:nth-child(6){animation-delay:1.25s}
+      .wf-flow { stroke-dasharray: 6 8; animation: wf-flow 1.4s linear infinite; }
+    }
+
+    /* Quiz */
+    .qz-opt[data-state="ok"] { border-color: #10b981; background: rgba(16,185,129,.15); }
+    .qz-opt[data-state="no"] { border-color: #ef4444; background: rgba(239,68,68,.12); }
+    .qz-fb { display:none; } .qz[data-answered] .qz-fb { display:block; }
+
+    /* TOC do módulo é um bloco inline, não uma barra lateral sticky */
+    [data-inema-toc] { position: static !important; top: auto !important; max-height: none !important; }
+    /* Painel de aparência (classes internas) */
+    .inema-appearance-sec { margin-bottom: .75rem; }
+    .inema-appearance-label { font-size: .7rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #9ca3af; margin-bottom: .35rem; }
+    .inema-appearance-row { display: flex; flex-wrap: wrap; gap: .35rem; }
+    .inema-chip { font-size: .8rem; padding: .3rem .65rem; border-radius: .5rem; border: 1px solid #374151; background: rgba(31,41,55,.6); color: #e5e7eb; cursor: pointer; }
+    .inema-chip:hover { border-color: #FACC15; }
+    .inema-chip[aria-pressed="true"], .inema-chip.is-active { background: rgba(250,204,21,.15); border-color: #FACC15; color: #FACC15; }
+    html:not(.dark) .inema-chip { background: #f3f4f6; color: #111827; border-color: #d1d5db; }
+    html:not(.dark) .inema-chip[aria-pressed="true"], html:not(.dark) .inema-chip.is-active { background: rgba(161,98,7,.1); border-color: #a16207; color: #a16207; }
+    /* Code box */
+    .codebox pre { white-space: pre-wrap; word-break: break-word; }
+    
+  </style>
+</head>
+<body class="bg-dark-900 text-neutral-100 min-h-screen">
+
+  <!-- NAVIGATION -->
+  <nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-14">
+        <div class="flex items-center space-x-3">
+          <a href="../../index.html" class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300">
+            <span class="text-2xl">⚙️</span>
+            <span class="font-bold text-lg hidden md:inline">Astra técnico</span>
+          </a>
+          <span class="text-neutral-600">|</span>
+          <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300 text-sm font-medium">INEMA.CLUB</a>
+          <span class="text-neutral-600 hidden sm:inline">-</span>
+          <a href="https://inema.pro" target="_blank" class="text-amber-700 dark:text-slate-300 hover:opacity-80 text-sm font-medium hidden sm:inline">PRO</a>
+        </div>
+        <div class="flex items-center space-x-1 sm:space-x-2">
+          <a href="../../curso/trilha1/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-emerald-400 bg-emerald-500/10">
+            <span class="sm:hidden">T1</span>
+            <span class="hidden sm:inline">Setup</span>
+          </a>
+          <a href="../../curso/trilha2/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors">
+            <span class="sm:hidden">T2</span>
+            <span class="hidden sm:inline">Escalar</span>
+          </a>
+          <button type="button" data-inema-journey-open class="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-primary bg-primary/10 hover:bg-primary/20 transition-colors">
+            <span>🧭</span><span>Minha jornada</span>
+            <span data-inema-journey-badge class="text-xs px-1.5 py-0.5 rounded-full bg-primary/20"></span>
+          </button>
+          <button type="button" data-inema-appearance-toggle="[data-inema-appearance]" aria-expanded="false" class="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" title="Aparência e leitura">
+            <span aria-hidden="true">Aa</span>
+          </button>
+          <button id="theme-toggle" class="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" title="Tema claro/escuro">
+            <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+            <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+  
+  <div data-inema-appearance class="inema-appearance-pop" role="region" aria-label="Aparência e leitura">
+    <div class="inema-appearance-sec">
+      <p class="inema-appearance-label">Tema</p>
+      <div class="inema-appearance-row">
+        <button type="button" data-inema-set-theme="inema-dark" class="inema-chip">Escuro</button>
+        <button type="button" data-inema-set-theme="claro" class="inema-chip">Claro</button>
+        <button type="button" data-inema-set-theme="sepia" class="inema-chip">Sépia</button>
+        <button type="button" data-inema-set-theme="foco" class="inema-chip">Foco</button>
+        <button type="button" data-inema-set-theme="contraste" class="inema-chip">Contraste</button>
+      </div>
+    </div>
+    <div class="inema-appearance-sec">
+      <p class="inema-appearance-label">Tamanho do texto</p>
+      <div class="inema-appearance-row">
+        <button type="button" data-inema-set-fontscale="90" class="inema-chip">A-</button>
+        <button type="button" data-inema-set-fontscale="100" class="inema-chip">A</button>
+        <button type="button" data-inema-set-fontscale="115" class="inema-chip">A+</button>
+        <button type="button" data-inema-set-fontscale="130" class="inema-chip">A++</button>
+      </div>
+    </div>
+    <div class="inema-appearance-sec">
+      <p class="inema-appearance-label">Fonte</p>
+      <div class="inema-appearance-row">
+        <button type="button" data-inema-set-font="inter" class="inema-chip">Inter</button>
+        <button type="button" data-inema-set-font="system" class="inema-chip">Sistema</button>
+        <button type="button" data-inema-set-font="leitura" class="inema-chip">Leitura</button>
+      </div>
+    </div>
+    <div class="inema-appearance-sec">
+      <p class="inema-appearance-label">Entrelinha</p>
+      <div class="inema-appearance-row">
+        <button type="button" data-inema-set-leading="1.5" class="inema-chip">Compacta</button>
+        <button type="button" data-inema-set-leading="1.7" class="inema-chip">Normal</button>
+        <button type="button" data-inema-set-leading="1.9" class="inema-chip">Ampla</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BREADCRUMB -->
+  <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div class="flex items-center space-x-2 text-sm text-neutral-400">
+      <a href="../../index.html" class="hover:text-emerald-400">Início</a><span>/</span>
+      <a href="index.html" class="hover:text-emerald-400">Trilha 1</a><span>/</span>
+      <span class="text-emerald-400">Módulo 1.3</span>
+    </div>
+  </nav>
+
+  <!-- HEADER -->
+  <header class="bg-gradient-to-br from-emerald-900/30 via-dark-800 to-dark-800 py-12 border-b border-dark-600">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <span class="inline-block px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-semibold rounded-full mb-4">MÓDULO 1.3</span>
+      <h1 class="text-3xl sm:text-4xl font-bold mb-4">🖱️ Computer use no navegador</h1>
+      <p class="text-lg text-neutral-400 max-w-3xl">Com a extensão do ChatGPT no navegador, o Astra abre sites, preenche formulários e publica. Na primeira sessão de teste ele postou um anúncio com o nome errado do produto: executou perfeitamente o pedido errado. Este módulo monta o fluxo que impede isso: extensão, rascunho antes de publicar, permissões e prova.</p>
+      
+      <div class="grid grid-cols-4 gap-4 mt-8 max-w-2xl">
+        <div class="bg-dark-800/50 rounded-lg p-3 border border-dark-600"><div class="text-xl font-bold text-emerald-400">6</div><div class="text-xs text-neutral-400">Tópicos</div></div><div class="bg-dark-800/50 rounded-lg p-3 border border-dark-600"><div class="text-xl font-bold text-emerald-400">40</div><div class="text-xs text-neutral-400">Minutos</div></div><div class="bg-dark-800/50 rounded-lg p-3 border border-dark-600"><div class="text-xl font-bold text-emerald-400">Intermediário</div><div class="text-xs text-neutral-400">Nível</div></div><div class="bg-dark-800/50 rounded-lg p-3 border border-dark-600"><div class="text-xl font-bold text-emerald-400">Prática</div><div class="text-xs text-neutral-400">Tipo</div></div>
+      </div>
+      <div data-inema-meter="modulo:1-3" class="inema-meter max-w-md mt-6" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Progresso do módulo">
+        <div class="flex justify-between text-sm text-neutral-400 mb-1"><span data-inema-meter-frac>0 de 6</span><span data-inema-meter-pct>0%</span></div>
+        <div class="inema-bar h-2 bg-dark-700 rounded-full overflow-hidden"><div class="inema-bar__fill h-full bg-emerald-500 rounded-full transition-all" data-inema-meter-fill style="width:0%"></div></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 inema-prose" data-inema-module="1-3" data-inema-track="1">
+    <nav aria-label="Tópicos deste módulo" class="mb-12 bg-dark-800 rounded-xl border border-dark-600 p-5" data-inema-toc>
+      <p class="text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-3">Neste módulo</p>
+      <ol class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+        <li><a href="#topico-1" class="flex items-start gap-2 text-neutral-300 hover:text-emerald-400"><span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">1</span><span>Ligar a extensão e vincular a conta</span></a></li><li><a href="#topico-2" class="flex items-start gap-2 text-neutral-300 hover:text-emerald-400"><span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">2</span><span>Rascunho primeiro: o caso do nome errado</span></a></li><li><a href="#topico-3" class="flex items-start gap-2 text-neutral-300 hover:text-emerald-400"><span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">3</span><span>O contrato de computer use</span></a></li><li><a href="#topico-4" class="flex items-start gap-2 text-neutral-300 hover:text-emerald-400"><span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">4</span><span>Permissões, reinícios e "continue"</span></a></li><li><a href="#topico-5" class="flex items-start gap-2 text-neutral-300 hover:text-emerald-400"><span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">5</span><span>Referenciar a tela: screenshot e seleção</span></a></li><li><a href="#topico-6" class="flex items-start gap-2 text-neutral-300 hover:text-emerald-400"><span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">6</span><span>Prática: uma ação real com rascunho e prova</span></a></li>
+      </ol>
+    </nav>
+
+    <!-- TÓPICO 1 -->
+    <section id="topico-1" data-inema-topic="modulo-1-3#topico-1" class="mb-16">
+      <div class="flex items-center space-x-4 mb-6">
+        <span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl">1</span>
+        <h2 class="text-2xl font-bold">🧩 Ligar a extensão e vincular a conta</h2>
+      </div>
+      <p class="text-neutral-300 mb-6 leading-relaxed" data-inema-block="m1-3-p1">Computer use aqui é o agente operando o seu navegador: lê a página, clica, digita, rola. A extensão do ChatGPT é o canal. Ela precisa estar instalada, habilitada e vinculada à mesma conta do app. O login nos sites é o seu: o agente usa a sessão já aberta no navegador, então tudo que ele faz é feito como você.</p>
+
+      <aside class="bg-dark-800/60 rounded-xl border border-dashed border-emerald-500/30 p-5 mb-6">
+        <p class="text-xs font-semibold uppercase tracking-wider text-emerald-400 mb-3">Novo aqui? Termos deste tópico</p>
+        <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+          <div><dt class="font-semibold text-neutral-100">Extensão</dt><dd class="text-neutral-400" data-inema-block="m1-3-p2">Complemento instalado no navegador que dá ao ChatGPT acesso à aba: ler o conteúdo, clicar, digitar.</dd></div><div><dt class="font-semibold text-neutral-100">Vincular</dt><dd class="text-neutral-400" data-inema-block="m1-3-p3">Conectar a extensão à sua conta do ChatGPT. Sem isso, o app não vê a extensão.</dd></div><div><dt class="font-semibold text-neutral-100">Aba controlada</dt><dd class="text-neutral-400" data-inema-block="m1-3-p4">A aba em que o agente está agindo. Você pode assistir; evite clicar nela durante a tarefa.</dd></div>
+        </dl>
+      </aside>
+
+      <div class="space-y-5 mb-6">
+        <h3 class="text-lg font-semibold text-emerald-400 mb-2">Habilitar</h3>
+        
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center"><span class="text-emerald-400 font-bold">1</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Instalar a extensão</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m1-3-p5">Loja de extensões do navegador → extensão oficial do ChatGPT. Confira o publicador.</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center"><span class="text-emerald-400 font-bold">2</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Habilitar e vincular</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m1-3-p6">Ícone da extensão → habilitar → entrar com a mesma conta do app. Pode pedir login de novo.</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center"><span class="text-emerald-400 font-bold">3</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Confirmar no app</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m1-3-p7">No ChatGPT (área de trabalho), a opção de usar o navegador aparece como conectada.</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center"><span class="text-emerald-400 font-bold">4</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Teste de leitura</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m1-3-p8">Abra uma página qualquer e peça "leia o título desta aba". Se ele responder o título, o canal está aberto.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="codebox bg-dark-800 rounded-xl border border-emerald-500/30 overflow-hidden mb-6">
+        <div class="px-5 py-3 border-b border-dark-600 flex items-start justify-between gap-3 flex-wrap">
+          <div><p class="text-xs font-semibold uppercase tracking-wider text-emerald-400 mb-1">Copie e rode</p><p class="text-sm text-neutral-300">Teste de leitura da aba (sem ação, só prova do canal)</p></div>
+          <button type="button" data-copy class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors">Copiar</button>
+        </div>
+        <pre class="p-5 text-sm text-neutral-100 bg-dark-900/60 font-mono leading-relaxed"><code class="language-text">Usando o navegador: abra &lt;URL_DE_UM_SITE_SEU&gt; e me diga o título da página e o texto do primeiro botão. Não clique em nada.</code></pre>
+        <div class="px-5 py-3 border-t border-dark-600 text-sm text-neutral-400"><strong class="text-neutral-300">Como verificar:</strong> Título e texto do botão batem com o que você vê. Se ele "descrever" o que faria, a extensão não está vinculada.</div>
+      </div>
+      
+      <button type="button" data-inema-read-toggle class="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors flex items-center space-x-2 justify-start">
+        <span class="inema-ico-todo" aria-hidden="true">&#9744;</span>
+        <span class="inema-ico-done" aria-hidden="true">&#9745;</span>
+        <span class="inema-label-todo">Marcar como lido</span>
+        <span class="inema-label-done">Lido</span>
+      </button>
+    </section>
+
+    <!-- TÓPICO 2 -->
+    <section id="topico-2" data-inema-topic="modulo-1-3#topico-2" class="mb-16">
+      <div class="flex items-center space-x-4 mb-6">
+        <span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl">2</span>
+        <h2 class="text-2xl font-bold">📝 Rascunho primeiro: o caso do nome errado</h2>
+      </div>
+      <p class="text-neutral-300 mb-6 leading-relaxed" data-inema-block="m1-3-p9">O modo de falha não é o agente travar. É ele concluir com confiança uma versão ligeiramente errada: nome do produto, data, link, valor. Em ações reversíveis (editar um arquivo local) isso custa um rollback. Em ações públicas (postar, enviar, pagar) custa reputação. Regra: o agente redige, você lê, o agente publica só depois do seu "ok", e devolve a prova.</p>
+
+      <figure class="rounded-2xl border border-emerald-500/30 bg-dark-900/40 p-3 sm:p-4 mb-6 overflow-hidden">
+        <svg viewBox="0 0 800 200" class="w-full h-auto" role="img" aria-label="Fluxo de publicação com rascunho: o agente redige, você revisa e responde ok, o agente publica e devolve a URL como prova"><defs>
+    <linearGradient id="s7-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#10b981"/></linearGradient>
+    <filter id="s7-glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="1.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <pattern id="s7-grid" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="1.3" cy="1.3" r="1.3" fill="#10b981" opacity="0.14"/></pattern>
+  </defs><rect width="800" height="200" fill="url(#s7-grid)"/><g class="wf-a"><rect x="40" y="60" width="162" height="84" rx="12" fill="#064e3b" stroke="#10b981" stroke-width="1.8"/>
+        <circle cx="58" cy="78" r="10" fill="#10b981"/><text x="58" y="82" text-anchor="middle" fill="#0b1220" font-family="Inter,sans-serif" font-size="11" font-weight="700">1</text>
+        <text x="121" y="104" text-anchor="middle" fill="#a7f3d0" font-family="Inter,sans-serif" font-size="12" font-weight="700">Redigir</text>
+        <text x="121" y="122" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5" font-weight="400">texto completo no chat</text></g>
+        <path class="wf-flow" d="M204 102 L224 102" stroke="#38bdf8" stroke-width="2" fill="none"/><polygon points="220,97 220,107 226,102" fill="#38bdf8"/><g class="wf-a"><rect x="226" y="60" width="162" height="84" rx="12" fill="#0e1b26" stroke="#38bdf8" stroke-width="1.8"/>
+        <circle cx="244" cy="78" r="10" fill="#38bdf8"/><text x="244" y="82" text-anchor="middle" fill="#0b1220" font-family="Inter,sans-serif" font-size="11" font-weight="700">2</text>
+        <text x="307" y="104" text-anchor="middle" fill="#9ad6ff" font-family="Inter,sans-serif" font-size="12" font-weight="700">Você revisa</text>
+        <text x="307" y="122" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5" font-weight="400">nome, data, link, valor</text></g>
+        <path class="wf-flow" d="M390 102 L410 102" stroke="#38bdf8" stroke-width="2" fill="none"/><polygon points="406,97 406,107 412,102" fill="#38bdf8"/><g class="wf-a"><rect x="412" y="60" width="162" height="84" rx="12" fill="#064e3b" stroke="#10b981" stroke-width="1.8"/>
+        <circle cx="430" cy="78" r="10" fill="#10b981"/><text x="430" y="82" text-anchor="middle" fill="#0b1220" font-family="Inter,sans-serif" font-size="11" font-weight="700">3</text>
+        <text x="493" y="104" text-anchor="middle" fill="#a7f3d0" font-family="Inter,sans-serif" font-size="12" font-weight="700">"ok, publique"</text>
+        <text x="493" y="122" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5" font-weight="400">só depois disso</text></g>
+        <path class="wf-flow" d="M576 102 L596 102" stroke="#38bdf8" stroke-width="2" fill="none"/><polygon points="592,97 592,107 598,102" fill="#38bdf8"/><g class="wf-a"><rect x="598" y="60" width="162" height="84" rx="12" fill="#0e1b26" stroke="#38bdf8" stroke-width="1.8"/>
+        <circle cx="616" cy="78" r="10" fill="#38bdf8"/><text x="616" y="82" text-anchor="middle" fill="#0b1220" font-family="Inter,sans-serif" font-size="11" font-weight="700">4</text>
+        <text x="679" y="104" text-anchor="middle" fill="#9ad6ff" font-family="Inter,sans-serif" font-size="12" font-weight="700">Prova</text>
+        <text x="679" y="122" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5" font-weight="400">URL + screenshot</text></g>
+        
+      <text x="400" y="178" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="11" font-style="italic">Fluxo de publicação com rascunho: o agente redige, você revisa e responde ok, o agente publica e devolve a URL como prova</text></svg>
+        <figcaption class="text-xs text-neutral-400 mt-3 px-1"><strong class="text-emerald-400">O que olhar:</strong> A segunda caixa é o único ponto em que o nome errado é pego. Não existe prompt que substitua a leitura.</figcaption>
+      </figure>
+
+      <div class="codebox bg-dark-800 rounded-xl border border-emerald-500/30 overflow-hidden mb-6">
+        <div class="px-5 py-3 border-b border-dark-600 flex items-start justify-between gap-3 flex-wrap">
+          <div><p class="text-xs font-semibold uppercase tracking-wider text-emerald-400 mb-1">Copie e rode</p><p class="text-sm text-neutral-300">Publicar um anúncio numa comunidade, com rascunho obrigatório</p></div>
+          <button type="button" data-copy class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors">Copiar</button>
+        </div>
+        <pre class="p-5 text-sm text-neutral-100 bg-dark-900/60 font-mono leading-relaxed"><code class="language-text">Tarefa em duas fases. NÃO publique nada na fase 1.
+
+Fase 1 (rascunho): escreva o texto de um anúncio para &lt;NOME_DA_COMUNIDADE&gt; informando que &lt;FATO_EXATO, ex.: "o treinamento X sobre GPT-6 Astra está disponível"&gt;. Use exatamente estes nomes: &lt;LISTA DE NOMES PRÓPRIOS&gt;. Me mostre o texto e pare.
+
+Fase 2 (só depois que eu responder "ok, publique"): usando o navegador, abra &lt;URL_DA_COMUNIDADE&gt;, crie um post com o texto aprovado sem alterações, publique e me devolva a URL do post e um screenshot.</code></pre>
+        <div class="px-5 py-3 border-t border-dark-600 text-sm text-neutral-400"><strong class="text-neutral-300">Como verificar:</strong> Fase 1 termina sem nenhuma ação no navegador. Após o ok, a URL abre no seu navegador com o texto idêntico ao aprovado. Diferença de uma palavra = rollback (editar o post) e ajuste do prompt.</div>
+      </div>
+
+      <div class="bg-red-900/20 rounded-xl border border-red-500/30 p-6 mb-6">
+        <h3 class="text-lg font-semibold text-red-400 mb-3 flex items-center"><span class="mr-2">⚠️</span> Nomes próprios vão na lista, não na cabeça</h3>
+        <p class="text-neutral-300" data-inema-block="m1-3-p10">O erro do nome foi um nome de produto parecido com o anterior. Toda vez que um nome próprio importa, escreva-o literalmente no prompt e peça "use exatamente".</p>
+      </div>
+      
+      <button type="button" data-inema-read-toggle class="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors flex items-center space-x-2 justify-start">
+        <span class="inema-ico-todo" aria-hidden="true">&#9744;</span>
+        <span class="inema-ico-done" aria-hidden="true">&#9745;</span>
+        <span class="inema-label-todo">Marcar como lido</span>
+        <span class="inema-label-done">Lido</span>
+      </button>
+    </section>
+
+    <!-- TÓPICO 3 -->
+    <section id="topico-3" data-inema-topic="modulo-1-3#topico-3" class="mb-16">
+      <div class="flex items-center space-x-4 mb-6">
+        <span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl">3</span>
+        <h2 class="text-2xl font-bold">🎯 O contrato de computer use</h2>
+      </div>
+      <p class="text-neutral-300 mb-6 leading-relaxed" data-inema-block="m1-3-p11">O contrato de três linhas ganha uma quarta parte obrigatória: o site ou app exato, com URL. E a prova é sempre visual ou um estado do site (URL do resultado, screenshot). Os cinco fluxos completos (busca que vira ferramenta, teste de app, edição de vídeo, celular) estão no curso irmão <a href="https://inematds.github.io/astra-computer-use/" target="_blank" class="text-sky-400 hover:text-sky-300 underline decoration-dotted">Computer Use com o GPT-6 Astra</a>; aqui fica o molde.</p>
+
+      <div class="codebox bg-dark-800 rounded-xl border border-emerald-500/30 overflow-hidden mb-6">
+        <div class="px-5 py-3 border-b border-dark-600 flex items-start justify-between gap-3 flex-wrap">
+          <div><p class="text-xs font-semibold uppercase tracking-wider text-emerald-400 mb-1">Copie e rode</p><p class="text-sm text-neutral-300">Molde de contrato para ação no navegador</p></div>
+          <button type="button" data-copy class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors">Copiar</button>
+        </div>
+        <pre class="p-5 text-sm text-neutral-100 bg-dark-900/60 font-mono leading-relaxed"><code class="language-text">App: &lt;site e URL exatos; aba já logada&gt;
+Resultado: &lt;estado final observável no site&gt;
+Não faça: &lt;não publique / não pague / não altere configurações / não saia deste domínio&gt;
+Prova: &lt;URL do resultado + screenshot da tela final&gt;
+
+Se algo pedir login, senha ou pagamento, pare e me avise. Não preencha.</code></pre>
+        <div class="px-5 py-3 border-t border-dark-600 text-sm text-neutral-400"><strong class="text-neutral-300">Como verificar:</strong> O agente para em qualquer tela de credencial. Se preencheu algo que você não deu, o "Não faça" ficou fraco ou a extensão tem autofill ligado: desligue.</div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div class="bg-emerald-900/20 rounded-xl border border-emerald-500/30 p-6">
+          <h4 class="font-bold text-emerald-400 mb-4">&#10003; Bom uso do navegador</h4>
+          <ul class="space-y-3 text-neutral-300"><li class="flex items-start space-x-2"><span class="text-emerald-400">&#10003;</span><span>Ler e resumir uma página longa</span></li><li class="flex items-start space-x-2"><span class="text-emerald-400">&#10003;</span><span>Preencher um formulário com dados que você deu, sem enviar</span></li><li class="flex items-start space-x-2"><span class="text-emerald-400">&#10003;</span><span>Publicar texto aprovado e devolver a URL</span></li><li class="flex items-start space-x-2"><span class="text-emerald-400">&#10003;</span><span>Navegar um painel e extrair números para uma tabela</span></li></ul>
+        </div>
+        <div class="bg-red-900/20 rounded-xl border border-red-500/30 p-6">
+          <h4 class="font-bold text-red-400 mb-4">&#10007; Não delegue ao navegador</h4>
+          <ul class="space-y-3 text-neutral-300"><li class="flex items-start space-x-2"><span class="text-red-400">&#10007;</span><span>Qualquer tela de senha, cartão, documento</span></li><li class="flex items-start space-x-2"><span class="text-red-400">&#10007;</span><span>Ações irreversíveis sem rascunho (enviar, pagar, apagar)</span></li><li class="flex items-start space-x-2"><span class="text-red-400">&#10007;</span><span>Sites com CAPTCHA (ele deve parar)</span></li><li class="flex items-start space-x-2"><span class="text-red-400">&#10007;</span><span>Tarefas que se repetem toda semana: vire ferramenta (curso irmão, fluxo 1)</span></li></ul>
+        </div>
+      </div>
+      
+      <button type="button" data-inema-read-toggle class="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors flex items-center space-x-2 justify-start">
+        <span class="inema-ico-todo" aria-hidden="true">&#9744;</span>
+        <span class="inema-ico-done" aria-hidden="true">&#9745;</span>
+        <span class="inema-label-todo">Marcar como lido</span>
+        <span class="inema-label-done">Lido</span>
+      </button>
+    </section>
+
+    <!-- TÓPICO 4 -->
+    <section id="topico-4" data-inema-topic="modulo-1-3#topico-4" class="mb-16">
+      <div class="flex items-center space-x-4 mb-6">
+        <span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl">4</span>
+        <h2 class="text-2xl font-bold">🔐 Permissões, reinícios e "continue"</h2>
+      </div>
+      <p class="text-neutral-300 mb-6 leading-relaxed" data-inema-block="m1-3-p12">Tarefas com navegador e com ferramentas externas pedem permissões novas no meio (acessar outro domínio, abrir um app). Às vezes o app reinicia. Regra: volte à mesma conversa em que a tarefa rodava e mande "continue". O agente retoma do último estado que registrou. Abrir conversa nova perde o contexto e repete o trabalho.</p>
+
+      <div class="overflow-x-auto rounded-xl border border-dark-600 mb-6">
+        <table class="w-full text-sm text-left">
+          
+          <thead class="bg-dark-800 text-emerald-400"><tr><th class="px-4 py-3 font-semibold">Sintoma</th><th class="px-4 py-3 font-semibold">Causa provável</th><th class="px-4 py-3 font-semibold">Ação</th></tr></thead>
+          <tbody class="divide-y divide-dark-600"><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">Parou pedindo permissão</td><td class="px-4 py-3 text-neutral-300">Domínio ou app novo</td><td class="px-4 py-3 text-neutral-300">Leia o pedido. Aprove se está no escopo. "continue".</td></tr><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">Conversa sumiu da lista</td><td class="px-4 py-3 text-neutral-300">Reordenação da barra lateral</td><td class="px-4 py-3 text-neutral-300">Recentes → projeto. Nunca recrie.</td></tr><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">App reiniciou</td><td class="px-4 py-3 text-neutral-300">Atualização ou ferramenta pesada</td><td class="px-4 py-3 text-neutral-300">Reabra a mesma conversa. "continue".</td></tr><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">Ele "descreve" em vez de agir</td><td class="px-4 py-3 text-neutral-300">Extensão desvinculada</td><td class="px-4 py-3 text-neutral-300">Tópico 1: vincular de novo, teste de leitura.</td></tr><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">Aba mudou sozinha</td><td class="px-4 py-3 text-neutral-300">Você clicou na aba controlada</td><td class="px-4 py-3 text-neutral-300">Deixe a aba quieta durante a tarefa.</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="codebox bg-dark-800 rounded-xl border border-emerald-500/30 overflow-hidden mb-6">
+        <div class="px-5 py-3 border-b border-dark-600 flex items-start justify-between gap-3 flex-wrap">
+          <div><p class="text-xs font-semibold uppercase tracking-wider text-emerald-400 mb-1">Copie e rode</p><p class="text-sm text-neutral-300">Retomar uma tarefa interrompida sem perder o estado</p></div>
+          <button type="button" data-copy class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors">Copiar</button>
+        </div>
+        <pre class="p-5 text-sm text-neutral-100 bg-dark-900/60 font-mono leading-relaxed"><code class="language-text">continue. Antes de agir, me diga em uma linha em que passo você parou e qual é o próximo.</code></pre>
+        <div class="px-5 py-3 border-t border-dark-600 text-sm text-neutral-400"><strong class="text-neutral-300">Como verificar:</strong> A linha descreve um passo que já aconteceu (você viu). Se descrever o início da tarefa, o contexto se perdeu: cole o contrato original e o que já foi feito.</div>
+      </div>
+
+      <div class="bg-primary/10 rounded-xl border border-primary/30 p-6 mb-6">
+        <h3 class="text-lg font-semibold text-primary mb-3 flex items-center"><span class="mr-2">💡</span> Uma conversa por tarefa longa</h3>
+        <p class="text-neutral-300" data-inema-block="m1-3-p13">Tarefas que pedem permissão no meio (MCP, navegador) ganham conversa própria e pin. Misturar duas tarefas longas numa conversa faz o "continue" retomar a errada.</p>
+      </div>
+      
+      <button type="button" data-inema-read-toggle class="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors flex items-center space-x-2 justify-start">
+        <span class="inema-ico-todo" aria-hidden="true">&#9744;</span>
+        <span class="inema-ico-done" aria-hidden="true">&#9745;</span>
+        <span class="inema-label-todo">Marcar como lido</span>
+        <span class="inema-label-done">Lido</span>
+      </button>
+    </section>
+
+    <!-- TÓPICO 5 -->
+    <section id="topico-5" data-inema-topic="modulo-1-3#topico-5" class="mb-16">
+      <div class="flex items-center space-x-4 mb-6">
+        <span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl">5</span>
+        <h2 class="text-2xl font-bold">🔗 Referenciar a tela: screenshot e seleção</h2>
+      </div>
+      <p class="text-neutral-300 mb-6 leading-relaxed" data-inema-block="m1-3-p14">No app, arraste o screenshot para o prompt. No CLI, a flag <code>-i</code> anexa um arquivo de imagem. A extensão também permite referenciar o que está na aba a partir do chat. Toda mudança visual começa com um "antes" anexado e termina com um "depois" que o próprio agente captura.</p>
+
+      <div class="codebox bg-dark-800 rounded-xl border border-emerald-500/30 overflow-hidden mb-6">
+        <div class="px-5 py-3 border-b border-dark-600 flex items-start justify-between gap-3 flex-wrap">
+          <div><p class="text-xs font-semibold uppercase tracking-wider text-emerald-400 mb-1">Copie e rode</p><p class="text-sm text-neutral-300">CLI: pedir uma mudança de UI a partir de um screenshot anexado</p></div>
+          <button type="button" data-copy class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors">Copiar</button>
+        </div>
+        <pre class="p-5 text-sm text-neutral-100 bg-dark-900/60 font-mono leading-relaxed"><code class="language-bash">codex -i ~/Imagens/tela-antes.png "Este é o estado atual da tela principal (screenshot anexo). Deixe o painel de memórias mais legível: mais contraste, agrupamento por data, sem mudar dados nem rotas. Ao terminar, suba o dev server, capture um screenshot da mesma tela em ./tela-depois.png e me dê o caminho."</code></pre>
+        <div class="px-5 py-3 border-t border-dark-600 text-sm text-neutral-400"><strong class="text-neutral-300">Como verificar:</strong> O arquivo tela-depois.png existe e mostra a mesma tela. Compare lado a lado antes de aceitar; "mais moderno" costuma vir mais escuro e mais vazio (módulo 1.4).</div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div class="bg-emerald-900/20 rounded-xl border border-emerald-500/30 p-6">
+          <h4 class="font-bold text-emerald-400 mb-4">&#10003; Referência boa</h4>
+          <ul class="space-y-3 text-neutral-300"><li class="flex items-start space-x-2"><span class="text-emerald-400">&#10003;</span><span>Screenshot inteiro + "o painel marcado em vermelho"</span></li><li class="flex items-start space-x-2"><span class="text-emerald-400">&#10003;</span><span>URL exata + texto visível do elemento</span></li><li class="flex items-start space-x-2"><span class="text-emerald-400">&#10003;</span><span>Nome do componente no código, se souber</span></li></ul>
+        </div>
+        <div class="bg-red-900/20 rounded-xl border border-red-500/30 p-6">
+          <h4 class="font-bold text-red-400 mb-4">&#10007; Referência ruim</h4>
+          <ul class="space-y-3 text-neutral-300"><li class="flex items-start space-x-2"><span class="text-red-400">&#10007;</span><span>"Aquele botão"</span></li><li class="flex items-start space-x-2"><span class="text-red-400">&#10007;</span><span>"A parte de cima"</span></li><li class="flex items-start space-x-2"><span class="text-red-400">&#10007;</span><span>Screenshot recortado sem contexto</span></li></ul>
+        </div>
+      </div>
+      
+      <button type="button" data-inema-read-toggle class="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors flex items-center space-x-2 justify-start">
+        <span class="inema-ico-todo" aria-hidden="true">&#9744;</span>
+        <span class="inema-ico-done" aria-hidden="true">&#9745;</span>
+        <span class="inema-label-todo">Marcar como lido</span>
+        <span class="inema-label-done">Lido</span>
+      </button>
+    </section>
+
+    <!-- TÓPICO 6 -->
+    <section id="topico-6" data-inema-topic="modulo-1-3#topico-6" class="mb-16">
+      <div class="flex items-center space-x-4 mb-6">
+        <span class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xl">6</span>
+        <h2 class="text-2xl font-bold">🧪 Prática: uma ação real com rascunho e prova</h2>
+      </div>
+      
+      <div class="space-y-5 mb-6">
+        <h3 class="text-lg font-semibold text-emerald-400 mb-2">Roteiro (site onde você pode editar e apagar)</h3>
+        
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center"><span class="text-emerald-400 font-bold">1</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Escolha um alvo reversível</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m1-3-p15">Um post numa comunidade sua, uma página de teste, um item de um painel que você pode apagar.</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center"><span class="text-emerald-400 font-bold">2</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Contrato de quatro partes</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m1-3-p16">App com URL, resultado, "não faça", prova. Nomes próprios em lista.</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center"><span class="text-emerald-400 font-bold">3</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Fase 1: rascunho</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m1-3-p17">Leia com atenção. Introduza de propósito um nome parecido no prompt e veja se ele confunde.</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center"><span class="text-emerald-400 font-bold">4</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Fase 2: publicar</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m1-3-p18">Só após "ok, publique". Receba URL e screenshot.</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center"><span class="text-emerald-400 font-bold">5</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Prova e rollback</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m1-3-p19">Abra a URL. Se algo divergir, peça a edição pelo mesmo agente e uma nova prova.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="codebox bg-dark-800 rounded-xl border border-emerald-500/30 overflow-hidden mb-6">
+        <div class="px-5 py-3 border-b border-dark-600 flex items-start justify-between gap-3 flex-wrap">
+          <div><p class="text-xs font-semibold uppercase tracking-wider text-emerald-400 mb-1">Copie e rode</p><p class="text-sm text-neutral-300">Prompt da prática, preenchido para um post de teste</p></div>
+          <button type="button" data-copy class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors">Copiar</button>
+        </div>
+        <pre class="p-5 text-sm text-neutral-100 bg-dark-900/60 font-mono leading-relaxed"><code class="language-text">App: &lt;URL_DA_COMUNIDADE_OU_PÁGINA&gt;, aba já logada.
+Tarefa em duas fases. NÃO publique na fase 1.
+Fase 1: escreva um post curto de teste com o título "Teste de publicação &lt;DATA&gt;" e o texto "&lt;TEXTO_QUE_VOCÊ_ESCOLHER&gt;". Use exatamente estes nomes: &lt;LISTA&gt;. Mostre e pare.
+Fase 2 (após "ok, publique"): publique sem alterações, me devolva a URL e um screenshot.
+Não faça: não altere outros posts, não mude configurações, não saia deste domínio.
+Se pedir senha ou pagamento, pare e me avise.</code></pre>
+        <div class="px-5 py-3 border-t border-dark-600 text-sm text-neutral-400"><strong class="text-neutral-300">Como verificar:</strong> Post publicado igual ao rascunho, URL abre, screenshot bate. Depois, peça "apague o post de teste e me mostre a lista sem ele" para fechar o ciclo com rollback.</div>
+      </div>
+
+      <figure class="rounded-2xl border border-emerald-500/30 bg-dark-900/40 p-3 sm:p-4 mb-6 overflow-hidden">
+        <svg viewBox="0 0 800 340" class="w-full h-auto" role="img" aria-label="Onde vai o tempo de uma tarefa de publicação bem feita: maior parte na revisão humana do rascunho, o resto em contrato, execução e prova"><defs>
+    <linearGradient id="s8-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#10b981"/></linearGradient>
+    <filter id="s8-glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="1.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <pattern id="s8-grid" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="1.3" cy="1.3" r="1.3" fill="#10b981" opacity="0.14"/></pattern>
+  </defs><rect width="800" height="340" fill="url(#s8-grid)"/>
+      <circle cx="220" cy="170" r="110" fill="none" stroke="#1f2937" stroke-width="34"/><circle cx="220" cy="170" r="110" fill="none" stroke="#10b981" stroke-width="34" stroke-dasharray="276.4601535159018 414.6902302738527" stroke-dashoffset="0" transform="rotate(-90 220 170)" opacity="0.95"/><circle cx="220" cy="170" r="110" fill="none" stroke="#38bdf8" stroke-width="34" stroke-dasharray="138.2300767579509 552.9203070318036" stroke-dashoffset="-276.4601535159018" transform="rotate(-90 220 170)" opacity="0.95"/><circle cx="220" cy="170" r="110" fill="none" stroke="#9ca3af" stroke-width="34" stroke-dasharray="172.78759594743863 518.3627878423159" stroke-dashoffset="-414.69023027385276" transform="rotate(-90 220 170)" opacity="0.5"/><circle cx="220" cy="170" r="110" fill="none" stroke="#10b981" stroke-width="34" stroke-dasharray="103.67255756846318 587.4778262212914" stroke-dashoffset="-587.4778262212914" transform="rotate(-90 220 170)" opacity="0.95"/>
+      <text x="220" y="166" text-anchor="middle" fill="#34d399" font-family="Inter,sans-serif" font-size="30" font-weight="800">tarefa</text><text x="220" y="192" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="11" font-weight="400">de publicar</text><rect x="420" y="86" width="16" height="16" rx="4" fill="#34d399"/><text x="446" y="99" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="14" font-weight="700">Revisar rascunho</text><text x="446" y="117" fill="#9ca3af" font-family="Inter,sans-serif" font-size="11">você</text><rect x="420" y="146" width="16" height="16" rx="4" fill="#38bdf8"/><text x="446" y="159" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="14" font-weight="700">Escrever contrato</text><text x="446" y="177" fill="#9ca3af" font-family="Inter,sans-serif" font-size="11">você</text><rect x="420" y="206" width="16" height="16" rx="4" fill="#9ca3af"/><text x="446" y="219" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="14" font-weight="700">Executar</text><text x="446" y="237" fill="#9ca3af" font-family="Inter,sans-serif" font-size="11">agente</text><rect x="420" y="266" width="16" height="16" rx="4" fill="#34d399"/><text x="446" y="279" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="14" font-weight="700">Conferir prova</text><text x="446" y="297" fill="#9ca3af" font-family="Inter,sans-serif" font-size="11">você</text></svg>
+        <figcaption class="text-xs text-neutral-400 mt-3 px-1"><strong class="text-emerald-400">O que olhar:</strong> Três fatias são suas. É assim que deve ser: o agente executa; a responsabilidade pelo que sai público é de quem lê o rascunho.</figcaption>
+      </figure>
+      
+      <button type="button" data-inema-read-toggle class="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors flex items-center space-x-2 justify-start">
+        <span class="inema-ico-todo" aria-hidden="true">&#9744;</span>
+        <span class="inema-ico-done" aria-hidden="true">&#9745;</span>
+        <span class="inema-label-todo">Marcar como lido</span>
+        <span class="inema-label-done">Lido</span>
+      </button>
+    </section>
+
+    <!-- QUIZ -->
+    
+      <div class="bg-dark-800 rounded-2xl border border-emerald-500/30 p-6 mb-6">
+        <h3 class="text-lg font-semibold text-emerald-400 mb-1 flex items-center"><span class="mr-2">🧪</span> Teste rápido do módulo</h3>
+        <p class="text-sm text-neutral-400 mb-5">Três perguntas. Clique numa opção para ver a resposta.</p>
+        <div class="space-y-5">
+        
+          <div class="qz" data-q="1">
+            <p class="font-semibold text-neutral-100 mb-3">1. O agente "descreve" o que faria no site em vez de fazer. Causa mais provável:</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-emerald-500/40 transition-colors" data-ok="0">O modelo é antigo</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-emerald-500/40 transition-colors" data-ok="1">A extensão não está vinculada à conta</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-emerald-500/40 transition-colors" data-ok="0">O site bloqueou</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-emerald-500/40 transition-colors" data-ok="0">Faltou "por favor"</button>
+            </div>
+            <p class="qz-fb mt-3 text-sm text-neutral-300" data-text="Sem canal com a aba, o agente não tem ferramenta e responde em texto."></p>
+          </div>
+          <div class="qz" data-q="2">
+            <p class="font-semibold text-neutral-100 mb-3">2. Qual passo pega um nome de produto errado num anúncio?</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-emerald-500/40 transition-colors" data-ok="0">Aumentar o esforço de raciocínio</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-emerald-500/40 transition-colors" data-ok="0">Pedir "seja cuidadoso"</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-emerald-500/40 transition-colors" data-ok="1">Ler o rascunho antes do "ok, publique"</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-emerald-500/40 transition-colors" data-ok="0">Rodar duas vezes</button>
+            </div>
+            <p class="qz-fb mt-3 text-sm text-neutral-300" data-text="Só a revisão humana do rascunho pega erros de conteúdo que o agente executa com confiança."></p>
+          </div>
+          <div class="qz" data-q="3">
+            <p class="font-semibold text-neutral-100 mb-3">3. A tarefa parou pedindo permissão e o app reiniciou. O que fazer?</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-emerald-500/40 transition-colors" data-ok="0">Abrir conversa nova e repetir</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-emerald-500/40 transition-colors" data-ok="1">Mesma conversa, "continue"</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-emerald-500/40 transition-colors" data-ok="0">Desinstalar a extensão</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-emerald-500/40 transition-colors" data-ok="0">Trocar de modelo</button>
+            </div>
+            <p class="qz-fb mt-3 text-sm text-neutral-300" data-text="A mesma conversa guarda o estado; nova conversa recomeça do zero."></p>
+          </div>
+        </div>
+      </div>
+
+    <!-- RESUMO DO MÓDULO -->
+    <section class="mb-12">
+      <div class="bg-gradient-to-br from-emerald-900/40 via-dark-800 to-dark-800 rounded-xl border border-emerald-500/30 p-8">
+        <h2 class="text-2xl font-bold mb-6 flex items-center"><span class="mr-3">📋</span> Resumo do módulo</h2>
+        <div class="space-y-4 mb-8">
+          <div class="flex items-start space-x-3"><span class="text-emerald-400 mt-1">&#10003;</span><div><strong class="text-white">Extensão</strong><span class="text-neutral-400"> - instalar, habilitar, vincular, teste de leitura da aba.</span></div></div><div class="flex items-start space-x-3"><span class="text-emerald-400 mt-1">&#10003;</span><div><strong class="text-white">Rascunho primeiro</strong><span class="text-neutral-400"> - toda publicação em duas fases; nomes próprios em lista, "use exatamente".</span></div></div><div class="flex items-start space-x-3"><span class="text-emerald-400 mt-1">&#10003;</span><div><strong class="text-white">Contrato de quatro partes</strong><span class="text-neutral-400"> - app com URL, resultado, não faça, prova visual.</span></div></div><div class="flex items-start space-x-3"><span class="text-emerald-400 mt-1">&#10003;</span><div><strong class="text-white">Continue</strong><span class="text-neutral-400"> - permissão ou reinício: mesma conversa, "continue", nunca recriar.</span></div></div><div class="flex items-start space-x-3"><span class="text-emerald-400 mt-1">&#10003;</span><div><strong class="text-white">Mostrar, não descrever</strong><span class="text-neutral-400"> - screenshot anexado no antes; o agente captura o depois.</span></div></div>
+        </div>
+        <div class="bg-dark-800/50 rounded-lg p-4 mb-8"><h3 class="font-semibold text-emerald-400 mb-2">Próximo módulo:</h3><p class="text-neutral-300">1.4 - Codar com o Astra: trocar, refatorar, rollback</p></div>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a href="modulo-1-2.html" class="flex-1 text-center px-6 py-3 bg-dark-700 text-neutral-300 rounded-lg font-semibold hover:bg-dark-600 transition-colors">&#8592; Módulo 1.2</a>
+          <a href="modulo-1-4.html" class="flex-1 text-center px-6 py-3 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-500 transition-colors">Próximo módulo &#8594;</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-dark-600 mt-16 py-8">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-neutral-500 text-sm space-y-2">
+      <p>GPT-6 Astra: operação técnica · Trilha 1 — Setup e operação · 2026 ·
+        <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300">INEMA.CLUB</a> -
+        <a href="https://inema.pro" target="_blank" class="text-amber-700 dark:text-slate-300">PRO</a></p>
+      <p class="text-xs">Fontes: <a href="https://openai.com/index/gpt-6-astra/" target="_blank" class="text-sky-400 hover:text-sky-300">página de lançamento do GPT-6 Astra</a> (OpenAI) · <a href="https://developers.openai.com/codex/" target="_blank" class="text-sky-400 hover:text-sky-300">documentação do Codex</a> · <a href="https://www.remotion.dev/" target="_blank" class="text-sky-400 hover:text-sky-300">Remotion</a> · <a href="https://github.com/ahujasid/blender-mcp" target="_blank" class="text-sky-400 hover:text-sky-300">Blender MCP</a> · <a href="https://obsidian.md/" target="_blank" class="text-sky-400 hover:text-sky-300">Obsidian</a>. Comandos conferidos no Codex CLI 0.153 (set/2026). Versão leiga deste conteúdo: <a href="https://inematds.github.io/gpt6-astra/" target="_blank" class="text-sky-400 hover:text-sky-300">GPT-6 Astra na prática</a>.</p>
+    </div>
+  </footer>
+
+  <!-- SCRIPTS núcleo v1 -->
+  <script>
+    function toggleTopic(button) {
+      const topicItem = button.closest('.topic-item');
+      const explanation = topicItem.querySelector('.topic-explanation');
+      const moduleCard = button.closest('.bg-dark-800');
+      if (moduleCard) {
+        moduleCard.querySelectorAll('.topic-explanation.active').forEach(exp => {
+          if (exp !== explanation) { exp.classList.remove('active'); const b = exp.parentElement.querySelector('[aria-controls="' + exp.id + '"]'); if (b) b.setAttribute('aria-expanded', 'false'); }
+        });
+      }
+      const isOpen = explanation.classList.toggle('active');
+      button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    }
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+    const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+    const html = document.documentElement;
+    if (!html.classList.contains('dark')) { themeToggleDarkIcon.classList.remove('hidden'); } else { themeToggleLightIcon.classList.remove('hidden'); }
+    themeToggle.addEventListener('click', () => {
+      themeToggleDarkIcon.classList.toggle('hidden');
+      themeToggleLightIcon.classList.toggle('hidden');
+      html.classList.toggle('dark');
+      const dark = html.classList.contains('dark');
+      localStorage.setItem('theme', dark ? 'dark' : 'light');
+      if (window.INEMA && INEMA.setPref) { try { INEMA.setPref('theme', dark ? 'inema-dark' : 'claro'); } catch (e) {} }
+    });
+    function openModal(modalId) { const m = document.getElementById(modalId); if (m) { m.classList.remove('hidden'); document.body.style.overflow = 'hidden'; } }
+    function closeModal() { document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden')); document.body.style.overflow = 'auto'; }
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+    // Quiz inline (3 perguntas por módulo)
+    document.addEventListener('click', (e) => {
+      const opt = e.target.closest('.qz-opt'); if (!opt) return;
+      const qz = opt.closest('.qz'); if (!qz || qz.hasAttribute('data-answered')) return;
+      const ok = opt.getAttribute('data-ok') === '1';
+      qz.querySelectorAll('.qz-opt').forEach(o => { o.setAttribute('data-state', o.getAttribute('data-ok') === '1' ? 'ok' : (o === opt ? 'no' : '')); o.disabled = true; });
+      qz.setAttribute('data-answered', ok ? 'ok' : 'no');
+      const fb = qz.querySelector('.qz-fb'); if (fb) fb.textContent = (ok ? '✓ Certo. ' : '✗ Não é essa. ') + (fb.getAttribute('data-text') || '');
+    });
+    // Copiar código
+    document.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-copy]'); if (!b) return;
+      const pre = b.closest('.codebox').querySelector('pre');
+      navigator.clipboard && navigator.clipboard.writeText(pre.innerText).then(() => { const t = b.textContent; b.textContent = 'Copiado ✓'; setTimeout(() => b.textContent = t, 1600); });
+    });
+  </script>
+
+  <script src="../../assets/learn.js"></script>
+  <script>
+    if (window.INEMA && typeof window.INEMA.init === 'function') { window.INEMA.init(); }
+  </script>
+</body>
+</html>

@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="inema-course" content="gpt6astratec">
+  <title>Memória compartilhada e o sistema completo | GPT-6 Astra: operação técnica</title>
+  <meta name="description" content="O incômodo mais citado por quem usa vários agentes é que eles não sabem nada uns dos outros: cada conversa recomeça do zero. A saída não é um produto, é um formato: notas em arquivos de texto numa pasta que todos os agentes leem e escrevem. Este módulo monta essa camada e junta tudo o que o curso construiu.">
+
+  <!-- ANTI-FOUC: bloqueante, antes de tudo -->
+  <script>
+(function () {
+  try {
+    var html = document.documentElement;
+    var DEF = { theme: 'inema-dark', font: 'inter', fontScale: 100, lineWidth: 68, leading: 1.7, accent: 'emerald' };
+    function clone(o) { var r = {}; for (var x in o) r[x] = o[x]; return r; }
+    var p = clone(DEF);
+    try {
+      var raw = localStorage.getItem('inema.prefs');
+      if (raw) { var parsed = JSON.parse(raw); if (parsed && typeof parsed === 'object') { for (var k in DEF) if (parsed[k] != null) p[k] = parsed[k]; } }
+      else { var legacy = localStorage.getItem('theme'); if (legacy === 'light') p.theme = 'claro'; else if (legacy === 'dark') p.theme = 'inema-dark'; }
+    } catch (e) { p = clone(DEF); }
+    var THEMES = { 'inema-dark': { dark: true, attr: null, cs: 'dark' }, 'claro': { dark: false, attr: null, cs: 'light' }, 'sepia': { dark: false, attr: 'sepia', cs: 'light' }, 'foco': { dark: null, attr: 'foco', cs: null }, 'contraste': { dark: true, attr: 'contraste', cs: 'dark' } };
+    var t = THEMES[p.theme] || THEMES['inema-dark'];
+    if (t.dark === true) html.classList.add('dark'); else if (t.dark === false) html.classList.remove('dark');
+    if (t.attr) html.setAttribute('data-theme', t.attr); else html.removeAttribute('data-theme');
+    html.style.colorScheme = (t.cs ? t.cs : (html.classList.contains('dark') ? 'dark' : 'light'));
+    html.setAttribute('data-font', p.font || 'inter'); html.setAttribute('data-accent', p.accent || 'emerald');
+    var s = html.style; var scale = (+p.fontScale || 100);
+    s.setProperty('--inema-font-scale', (scale / 100).toString()); s.setProperty('font-size', scale + '%');
+    s.setProperty('--measure', (+p.lineWidth || 68) + 'ch'); s.setProperty('--lh-body', (+p.leading || 1.7).toString());
+    var fam = p.font === 'system' ? 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif' : (p.font === 'leitura' ? '"Atkinson Hyperlegible", "Inter", system-ui, sans-serif' : '"Inter", system-ui, sans-serif');
+    s.setProperty('--font-body', fam);
+    var ACC = { emerald: [152, 76, 45], blue: [217, 91, 60], purple: [258, 90, 66], amber: [38, 92, 50], teal: [174, 72, 41], rose: [350, 89, 60] };
+    var a = ACC[p.accent] || ACC.emerald;
+    s.setProperty('--accent-h', a[0] + ''); s.setProperty('--accent-s', a[1] + '%'); s.setProperty('--accent-l', a[2] + '%');
+    s.setProperty('--accent', 'hsl(' + a[0] + ' ' + a[1] + '% ' + a[2] + '%)');
+  } catch (err) { try { document.documentElement.classList.add('dark'); document.documentElement.style.colorScheme = 'dark'; } catch (e) {} }
+})();
+</script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class', theme: { extend: { colors: { primary: '#FACC15', dark: { 900: '#111827', 800: '#1f2937', 700: '#374151', 600: '#4b5563' } } } } }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/learn.css">
+
+  <!-- Manifesto do curso (obrigatório em toda página) -->
+  <script type="application/json" data-inema-manifest>
+{
+ "course": "gpt6astratec",
+ "tracks": [
+  {
+   "n": "1",
+   "title": "Setup e operação",
+   "modules": [
+    {
+     "id": "1-1",
+     "title": "O que o Astra muda no loop de trabalho",
+     "topics": 6,
+     "href": "curso/trilha1/modulo-1-1.html"
+    },
+    {
+     "id": "1-2",
+     "title": "Ativando: app, Codex e CLI",
+     "topics": 6,
+     "href": "curso/trilha1/modulo-1-2.html"
+    },
+    {
+     "id": "1-3",
+     "title": "Computer use no navegador",
+     "topics": 6,
+     "href": "curso/trilha1/modulo-1-3.html"
+    },
+    {
+     "id": "1-4",
+     "title": "Codar com o Astra: trocar, refatorar, rollback",
+     "topics": 6,
+     "href": "curso/trilha1/modulo-1-4.html"
+    }
+   ]
+  },
+  {
+   "n": "2",
+   "title": "Construir e escalar",
+   "modules": [
+    {
+     "id": "2-1",
+     "title": "Skills: ensinar a ferramenta e o gosto",
+     "topics": 6,
+     "href": "curso/trilha2/modulo-2-1.html"
+    },
+    {
+     "id": "2-2",
+     "title": "MCP e trabalhos longos",
+     "topics": 6,
+     "href": "curso/trilha2/modulo-2-2.html"
+    },
+    {
+     "id": "2-3",
+     "title": "Cota, custo e orquestração",
+     "topics": 6,
+     "href": "curso/trilha2/modulo-2-3.html"
+    },
+    {
+     "id": "2-4",
+     "title": "Memória compartilhada e o sistema completo",
+     "topics": 6,
+     "href": "curso/trilha2/modulo-2-4.html"
+    }
+   ]
+  }
+ ]
+}
+  </script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .dark body { background-color: #111827; }
+    .topic-explanation { display: none; }
+    .topic-explanation.active { display: block; }
+    html { scroll-behavior: smooth; }
+    [id] { scroll-margin-top: 5rem; }
+
+    /* Light mode overrides */
+    html:not(.dark) body { background-color: #f8fafc; }
+    html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+    html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+    html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+    html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+    html:not(.dark) .bg-dark-800\/50, html:not(.dark) .bg-dark-800\/60, html:not(.dark) .bg-dark-900\/40, html:not(.dark) .bg-dark-900\/60 { background-color: #f3f4f6; }
+    html:not(.dark) .text-neutral-100 { color: #111827; }
+    html:not(.dark) .text-white { color: #111827; }
+    html:not(.dark) .text-neutral-300 { color: #4b5563; }
+    html:not(.dark) .text-neutral-400 { color: #6b7280; }
+    html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+    html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+    html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+    
+    html:not(.dark) .text-emerald-400 { color: #059669; }
+    html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5, 150, 105, 0.12); }
+    html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5, 150, 105, 0.08); }
+    html:not(.dark) .bg-emerald-900\/20 { background-color: rgba(5, 150, 105, 0.07); }
+    html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5, 150, 105, 0.25); }
+    html:not(.dark) .hover\:bg-emerald-500\/30:hover { background-color: rgba(5, 150, 105, 0.18); }
+    html:not(.dark) .hover\:text-emerald-400:hover { color: #059669; }
+    html:not(.dark) .hover\:bg-emerald-500\/10:hover { background-color: rgba(5, 150, 105, 0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-emerald-400 { color: #059669; }
+
+    html:not(.dark) .text-blue-400 { color: #2563eb; }
+    html:not(.dark) .bg-blue-500\/20 { background-color: rgba(37, 99, 235, 0.12); }
+    html:not(.dark) .bg-blue-500\/10 { background-color: rgba(37, 99, 235, 0.08); }
+    html:not(.dark) .bg-blue-900\/20 { background-color: rgba(37, 99, 235, 0.07); }
+    html:not(.dark) .border-blue-500\/30 { border-color: rgba(37, 99, 235, 0.25); }
+    html:not(.dark) .hover\:bg-blue-500\/30:hover { background-color: rgba(37, 99, 235, 0.18); }
+    html:not(.dark) .hover\:text-blue-400:hover { color: #2563eb; }
+    html:not(.dark) .hover\:bg-blue-500\/10:hover { background-color: rgba(37, 99, 235, 0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-blue-400 { color: #2563eb; }
+
+    html:not(.dark) .text-purple-400 { color: #7c3aed; }
+    html:not(.dark) .bg-purple-500\/20 { background-color: rgba(124, 58, 237, 0.12); }
+    html:not(.dark) .bg-purple-500\/10 { background-color: rgba(124, 58, 237, 0.08); }
+    html:not(.dark) .bg-purple-900\/20 { background-color: rgba(124, 58, 237, 0.07); }
+    html:not(.dark) .border-purple-500\/30 { border-color: rgba(124, 58, 237, 0.25); }
+    html:not(.dark) .hover\:bg-purple-500\/30:hover { background-color: rgba(124, 58, 237, 0.18); }
+    html:not(.dark) .hover\:text-purple-400:hover { color: #7c3aed; }
+    html:not(.dark) .hover\:bg-purple-500\/10:hover { background-color: rgba(124, 58, 237, 0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-purple-400 { color: #7c3aed; }
+
+    html:not(.dark) .text-amber-400 { color: #92400e; }
+    html:not(.dark) .bg-amber-500\/20 { background-color: rgba(146, 64, 14, 0.12); }
+    html:not(.dark) .bg-amber-500\/10 { background-color: rgba(146, 64, 14, 0.08); }
+    html:not(.dark) .bg-amber-900\/20 { background-color: rgba(146, 64, 14, 0.07); }
+    html:not(.dark) .border-amber-500\/30 { border-color: rgba(146, 64, 14, 0.25); }
+    html:not(.dark) .hover\:bg-amber-500\/30:hover { background-color: rgba(146, 64, 14, 0.18); }
+    html:not(.dark) .hover\:text-amber-400:hover { color: #92400e; }
+    html:not(.dark) .hover\:bg-amber-500\/10:hover { background-color: rgba(146, 64, 14, 0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-amber-400 { color: #92400e; }
+
+    html:not(.dark) .text-red-400 { color: #b91c1c; }
+    html:not(.dark) .bg-red-500\/20 { background-color: rgba(185, 28, 28, 0.12); }
+    html:not(.dark) .bg-red-500\/10 { background-color: rgba(185, 28, 28, 0.08); }
+    html:not(.dark) .bg-red-900\/20 { background-color: rgba(185, 28, 28, 0.07); }
+    html:not(.dark) .border-red-500\/30 { border-color: rgba(185, 28, 28, 0.25); }
+    html:not(.dark) .hover\:bg-red-500\/30:hover { background-color: rgba(185, 28, 28, 0.18); }
+    html:not(.dark) .hover\:text-red-400:hover { color: #b91c1c; }
+    html:not(.dark) .hover\:bg-red-500\/10:hover { background-color: rgba(185, 28, 28, 0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-red-400 { color: #b91c1c; }
+    html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+    html:not(.dark) .text-primary { color: #a16207; }
+    html:not(.dark) .bg-primary\/10 { background-color: rgba(161, 98, 7, 0.08); }
+    html:not(.dark) .border-primary\/30 { border-color: rgba(161, 98, 7, 0.25); }
+    html:not(.dark) .text-sky-400 { color: #0369a1; }
+    html:not(.dark) .text-yellow-400 { color: #a16207; }
+    html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+    html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+    html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95); }
+    html:not(.dark) .text-amber-700 { color: #92400e; }
+
+    /* Dark mode - bordas suaves */
+    .dark .border-dark-600 { border-color: #374151; }
+    .dark .divide-dark-600 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+
+    /* SVG */
+    html:not(.dark) svg[role="img"] { filter: saturate(0.82) brightness(0.96); }
+    @keyframes wf-pulse { 0%,100% { opacity:.55 } 50% { opacity:1 } }
+    @keyframes wf-flow { to { stroke-dashoffset: -28; } }
+    @media (prefers-reduced-motion: no-preference) {
+      .wf-a { animation: wf-pulse 2.6s ease-in-out infinite; }
+      .wf-a:nth-child(2){animation-delay:.25s} .wf-a:nth-child(3){animation-delay:.5s}
+      .wf-a:nth-child(4){animation-delay:.75s} .wf-a:nth-child(5){animation-delay:1s} .wf-a:nth-child(6){animation-delay:1.25s}
+      .wf-flow { stroke-dasharray: 6 8; animation: wf-flow 1.4s linear infinite; }
+    }
+
+    /* Quiz */
+    .qz-opt[data-state="ok"] { border-color: #10b981; background: rgba(16,185,129,.15); }
+    .qz-opt[data-state="no"] { border-color: #ef4444; background: rgba(239,68,68,.12); }
+    .qz-fb { display:none; } .qz[data-answered] .qz-fb { display:block; }
+
+    /* TOC do módulo é um bloco inline, não uma barra lateral sticky */
+    [data-inema-toc] { position: static !important; top: auto !important; max-height: none !important; }
+    /* Painel de aparência (classes internas) */
+    .inema-appearance-sec { margin-bottom: .75rem; }
+    .inema-appearance-label { font-size: .7rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #9ca3af; margin-bottom: .35rem; }
+    .inema-appearance-row { display: flex; flex-wrap: wrap; gap: .35rem; }
+    .inema-chip { font-size: .8rem; padding: .3rem .65rem; border-radius: .5rem; border: 1px solid #374151; background: rgba(31,41,55,.6); color: #e5e7eb; cursor: pointer; }
+    .inema-chip:hover { border-color: #FACC15; }
+    .inema-chip[aria-pressed="true"], .inema-chip.is-active { background: rgba(250,204,21,.15); border-color: #FACC15; color: #FACC15; }
+    html:not(.dark) .inema-chip { background: #f3f4f6; color: #111827; border-color: #d1d5db; }
+    html:not(.dark) .inema-chip[aria-pressed="true"], html:not(.dark) .inema-chip.is-active { background: rgba(161,98,7,.1); border-color: #a16207; color: #a16207; }
+    /* Code box */
+    .codebox pre { white-space: pre-wrap; word-break: break-word; }
+    
+  </style>
+</head>
+<body class="bg-dark-900 text-neutral-100 min-h-screen">
+
+  <!-- NAVIGATION -->
+  <nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-14">
+        <div class="flex items-center space-x-3">
+          <a href="../../index.html" class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300">
+            <span class="text-2xl">⚙️</span>
+            <span class="font-bold text-lg hidden md:inline">Astra técnico</span>
+          </a>
+          <span class="text-neutral-600">|</span>
+          <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300 text-sm font-medium">INEMA.CLUB</a>
+          <span class="text-neutral-600 hidden sm:inline">-</span>
+          <a href="https://inema.pro" target="_blank" class="text-amber-700 dark:text-slate-300 hover:opacity-80 text-sm font-medium hidden sm:inline">PRO</a>
+        </div>
+        <div class="flex items-center space-x-1 sm:space-x-2">
+          <a href="../../curso/trilha1/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors">
+            <span class="sm:hidden">T1</span>
+            <span class="hidden sm:inline">Setup</span>
+          </a>
+          <a href="../../curso/trilha2/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-blue-400 bg-blue-500/10">
+            <span class="sm:hidden">T2</span>
+            <span class="hidden sm:inline">Escalar</span>
+          </a>
+          <button type="button" data-inema-journey-open class="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-primary bg-primary/10 hover:bg-primary/20 transition-colors">
+            <span>🧭</span><span>Minha jornada</span>
+            <span data-inema-journey-badge class="text-xs px-1.5 py-0.5 rounded-full bg-primary/20"></span>
+          </button>
+          <button type="button" data-inema-appearance-toggle="[data-inema-appearance]" aria-expanded="false" class="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" title="Aparência e leitura">
+            <span aria-hidden="true">Aa</span>
+          </button>
+          <button id="theme-toggle" class="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" title="Tema claro/escuro">
+            <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+            <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+  
+  <div data-inema-appearance class="inema-appearance-pop" role="region" aria-label="Aparência e leitura">
+    <div class="inema-appearance-sec">
+      <p class="inema-appearance-label">Tema</p>
+      <div class="inema-appearance-row">
+        <button type="button" data-inema-set-theme="inema-dark" class="inema-chip">Escuro</button>
+        <button type="button" data-inema-set-theme="claro" class="inema-chip">Claro</button>
+        <button type="button" data-inema-set-theme="sepia" class="inema-chip">Sépia</button>
+        <button type="button" data-inema-set-theme="foco" class="inema-chip">Foco</button>
+        <button type="button" data-inema-set-theme="contraste" class="inema-chip">Contraste</button>
+      </div>
+    </div>
+    <div class="inema-appearance-sec">
+      <p class="inema-appearance-label">Tamanho do texto</p>
+      <div class="inema-appearance-row">
+        <button type="button" data-inema-set-fontscale="90" class="inema-chip">A-</button>
+        <button type="button" data-inema-set-fontscale="100" class="inema-chip">A</button>
+        <button type="button" data-inema-set-fontscale="115" class="inema-chip">A+</button>
+        <button type="button" data-inema-set-fontscale="130" class="inema-chip">A++</button>
+      </div>
+    </div>
+    <div class="inema-appearance-sec">
+      <p class="inema-appearance-label">Fonte</p>
+      <div class="inema-appearance-row">
+        <button type="button" data-inema-set-font="inter" class="inema-chip">Inter</button>
+        <button type="button" data-inema-set-font="system" class="inema-chip">Sistema</button>
+        <button type="button" data-inema-set-font="leitura" class="inema-chip">Leitura</button>
+      </div>
+    </div>
+    <div class="inema-appearance-sec">
+      <p class="inema-appearance-label">Entrelinha</p>
+      <div class="inema-appearance-row">
+        <button type="button" data-inema-set-leading="1.5" class="inema-chip">Compacta</button>
+        <button type="button" data-inema-set-leading="1.7" class="inema-chip">Normal</button>
+        <button type="button" data-inema-set-leading="1.9" class="inema-chip">Ampla</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BREADCRUMB -->
+  <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div class="flex items-center space-x-2 text-sm text-neutral-400">
+      <a href="../../index.html" class="hover:text-blue-400">Início</a><span>/</span>
+      <a href="index.html" class="hover:text-blue-400">Trilha 2</a><span>/</span>
+      <span class="text-blue-400">Módulo 2.4</span>
+    </div>
+  </nav>
+
+  <!-- HEADER -->
+  <header class="bg-gradient-to-br from-blue-900/30 via-dark-800 to-dark-800 py-12 border-b border-dark-600">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <span class="inline-block px-3 py-1 bg-blue-500/20 text-blue-400 text-xs font-semibold rounded-full mb-4">MÓDULO 2.4</span>
+      <h1 class="text-3xl sm:text-4xl font-bold mb-4">🧠 Memória compartilhada e o sistema completo</h1>
+      <p class="text-lg text-neutral-400 max-w-3xl">O incômodo mais citado por quem usa vários agentes é que eles não sabem nada uns dos outros: cada conversa recomeça do zero. A saída não é um produto, é um formato: notas em arquivos de texto numa pasta que todos os agentes leem e escrevem. Este módulo monta essa camada e junta tudo o que o curso construiu.</p>
+      
+      <div class="grid grid-cols-4 gap-4 mt-8 max-w-2xl">
+        <div class="bg-dark-800/50 rounded-lg p-3 border border-dark-600"><div class="text-xl font-bold text-blue-400">6</div><div class="text-xs text-neutral-400">Tópicos</div></div><div class="bg-dark-800/50 rounded-lg p-3 border border-dark-600"><div class="text-xl font-bold text-blue-400">45</div><div class="text-xs text-neutral-400">Minutos</div></div><div class="bg-dark-800/50 rounded-lg p-3 border border-dark-600"><div class="text-xl font-bold text-blue-400">Avançado</div><div class="text-xs text-neutral-400">Nível</div></div><div class="bg-dark-800/50 rounded-lg p-3 border border-dark-600"><div class="text-xl font-bold text-blue-400">Prática</div><div class="text-xs text-neutral-400">Tipo</div></div>
+      </div>
+      <div data-inema-meter="modulo:2-4" class="inema-meter max-w-md mt-6" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Progresso do módulo">
+        <div class="flex justify-between text-sm text-neutral-400 mb-1"><span data-inema-meter-frac>0 de 6</span><span data-inema-meter-pct>0%</span></div>
+        <div class="inema-bar h-2 bg-dark-700 rounded-full overflow-hidden"><div class="inema-bar__fill h-full bg-blue-500 rounded-full transition-all" data-inema-meter-fill style="width:0%"></div></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 inema-prose" data-inema-module="2-4" data-inema-track="2">
+    <nav aria-label="Tópicos deste módulo" class="mb-12 bg-dark-800 rounded-xl border border-dark-600 p-5" data-inema-toc>
+      <p class="text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-3">Neste módulo</p>
+      <ol class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+        <li><a href="#topico-1" class="flex items-start gap-2 text-neutral-300 hover:text-blue-400"><span class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">1</span><span>O problema: contexto que não atravessa sessões</span></a></li><li><a href="#topico-2" class="flex items-start gap-2 text-neutral-300 hover:text-blue-400"><span class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">2</span><span>Uma base em arquivos de texto</span></a></li><li><a href="#topico-3" class="flex items-start gap-2 text-neutral-300 hover:text-blue-400"><span class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">3</span><span>Conectar os agentes à base</span></a></li><li><a href="#topico-4" class="flex items-start gap-2 text-neutral-300 hover:text-blue-400"><span class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">4</span><span>Visualizar e revisar a base</span></a></li><li><a href="#topico-5" class="flex items-start gap-2 text-neutral-300 hover:text-blue-400"><span class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">5</span><span>O sistema completo</span></a></li><li><a href="#topico-6" class="flex items-start gap-2 text-neutral-300 hover:text-blue-400"><span class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">6</span><span>Prática final: montar a base e fechar um ciclo</span></a></li>
+      </ol>
+    </nav>
+
+    <!-- TÓPICO 1 -->
+    <section id="topico-1" data-inema-topic="modulo-2-4#topico-1" class="mb-16">
+      <div class="flex items-center space-x-4 mb-6">
+        <span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl">1</span>
+        <h2 class="text-2xl font-bold">🧩 O problema: contexto que não atravessa sessões</h2>
+      </div>
+      <p class="text-neutral-300 mb-6 leading-relaxed" data-inema-block="m2-4-p1">Sessões são isoladas por desenho: cada uma nasce sem saber o que a anterior descobriu. Projetos e instruções resolvem parte disso dentro de uma ferramenta. O que não se resolve sozinho é o contexto que atravessa ferramentas: o que você decidiu num agente e precisa valer no outro.</p>
+
+      <figure class="rounded-2xl border border-blue-500/30 bg-dark-900/40 p-3 sm:p-4 mb-6 overflow-hidden">
+        <svg viewBox="0 0 800 340" class="w-full h-auto" role="img" aria-label="Três camadas de memória, da mais volátil à mais durável: contexto da sessão, instruções do projeto, base de conhecimento em arquivos"><defs>
+    <linearGradient id="s19-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#60a5fa"/><stop offset="1" stop-color="#3b82f6"/></linearGradient>
+    <filter id="s19-glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="1.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <pattern id="s19-grid" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="1.3" cy="1.3" r="1.3" fill="#3b82f6" opacity="0.14"/></pattern>
+  </defs><rect width="800" height="340" fill="url(#s19-grid)"/><g ><rect x="100" y="40" width="600" height="52" rx="12" fill="#0e1b26" stroke="#3b82f6" stroke-width="1.6" opacity="0.95"/>
+        <text x="400" y="63" text-anchor="middle" fill="#bfdbfe" font-family="Inter,sans-serif" font-size="14" font-weight="700">Contexto da sessão</text>
+        <text x="400" y="81" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" font-weight="400">morre ao fechar</text></g><g ><rect x="140" y="110" width="520" height="52" rx="12" fill="#0e1b26" stroke="#38bdf8" stroke-width="1.6" opacity="0.95"/>
+        <text x="400" y="133" text-anchor="middle" fill="#9ad6ff" font-family="Inter,sans-serif" font-size="14" font-weight="700">Instruções do projeto</text>
+        <text x="400" y="151" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" font-weight="400">AGENTS.md, vale num repo</text></g><g ><rect x="180" y="180" width="440" height="52" rx="12" fill="#0e1b26" stroke="#3b82f6" stroke-width="1.6" opacity="0.95"/>
+        <text x="400" y="203" text-anchor="middle" fill="#bfdbfe" font-family="Inter,sans-serif" font-size="14" font-weight="700">Reconhecimento salvo</text>
+        <text x="400" y="221" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" font-weight="400">MAPA.md, vale no repo</text></g><g filter="url(#s19-glow)"><rect x="220" y="250" width="360" height="52" rx="12" fill="#1e3a8a" stroke="url(#s19-g)" stroke-width="2.5" opacity="0.95"/>
+        <text x="400" y="273" text-anchor="middle" fill="#60a5fa" font-family="Inter,sans-serif" font-size="14" font-weight="700">Base em arquivos</text>
+        <text x="400" y="291" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" font-weight="400">atravessa ferramentas e projetos</text></g>
+      <text x="60" y="170" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" transform="rotate(-90 60 170)">de fora para dentro</text></svg>
+        <figcaption class="text-xs text-neutral-400 mt-3 px-1"><strong class="text-blue-400">O que olhar:</strong> Cada camada de baixo sobrevive mais que a de cima. A da base é a única que serve a dois agentes diferentes ao mesmo tempo.</figcaption>
+      </figure>
+
+      <div class="overflow-x-auto rounded-xl border border-dark-600 mb-6">
+        <table class="w-full text-sm text-left">
+          
+          <thead class="bg-dark-800 text-blue-400"><tr><th class="px-4 py-3 font-semibold">O que guardar</th><th class="px-4 py-3 font-semibold">Onde</th><th class="px-4 py-3 font-semibold">Por quê</th></tr></thead>
+          <tbody class="divide-y divide-dark-600"><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">Como rodar e testar este projeto</td><td class="px-4 py-3 text-neutral-300">AGENTS.md do repo</td><td class="px-4 py-3 text-neutral-300">Vale para toda sessão daquela pasta</td></tr><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">Mapa e riscos do repo</td><td class="px-4 py-3 text-neutral-300">MAPA.md do repo</td><td class="px-4 py-3 text-neutral-300">Evita releitura completa</td></tr><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">Decisões que atravessam projetos</td><td class="px-4 py-3 text-neutral-300">Base em arquivos</td><td class="px-4 py-3 text-neutral-300">Vários agentes, vários repos</td></tr><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">Preferências suas de trabalho</td><td class="px-4 py-3 text-neutral-300">Base em arquivos</td><td class="px-4 py-3 text-neutral-300">Estilo, formato de entrega, o que reprovar</td></tr><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">Segredos, chaves, senhas</td><td class="px-4 py-3 text-neutral-300">Gerenciador de segredos</td><td class="px-4 py-3 text-neutral-300">Nunca em nota nem em repo</td></tr></tbody>
+        </table>
+      </div>
+      
+      <button type="button" data-inema-read-toggle class="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors flex items-center space-x-2 justify-start">
+        <span class="inema-ico-todo" aria-hidden="true">&#9744;</span>
+        <span class="inema-ico-done" aria-hidden="true">&#9745;</span>
+        <span class="inema-label-todo">Marcar como lido</span>
+        <span class="inema-label-done">Lido</span>
+      </button>
+    </section>
+
+    <!-- TÓPICO 2 -->
+    <section id="topico-2" data-inema-topic="modulo-2-4#topico-2" class="mb-16">
+      <div class="flex items-center space-x-4 mb-6">
+        <span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl">2</span>
+        <h2 class="text-2xl font-bold">📓 Uma base em arquivos de texto</h2>
+      </div>
+      <p class="text-neutral-300 mb-6 leading-relaxed" data-inema-block="m2-4-p2">O formato importa mais que a ferramenta. Uma nota por ideia, nome descritivo, um cabeçalho pequeno com tipo e data, links entre notas relacionadas. O Obsidian dá visualização e busca em cima disso, mas qualquer agente com acesso ao disco lê a mesma pasta.</p>
+
+      <div class="codebox bg-dark-800 rounded-xl border border-blue-500/30 overflow-hidden mb-6">
+        <div class="px-5 py-3 border-b border-dark-600 flex items-start justify-between gap-3 flex-wrap">
+          <div><p class="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-1">Copie e rode</p><p class="text-sm text-neutral-300">Estrutura inicial da base e o formato de uma nota</p></div>
+          <button type="button" data-copy class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors">Copiar</button>
+        </div>
+        <pre class="p-5 text-sm text-neutral-100 bg-dark-900/60 font-mono leading-relaxed"><code class="language-bash">mkdir -p ~/base/{decisoes,projetos,ferramentas,pessoas,diario}
+
+cat &gt; ~/base/decisoes/orquestracao-modelo-barato.md &lt;&lt;'EOF'
+---
+tipo: decisao
+data: 2026-09-07
+projetos: [&lt;projeto-a&gt;, &lt;projeto-b&gt;]
+---
+
+# Orquestração: fronteira planeja, barato executa
+
+Tarefas repetitivas de 10+ passos usam PLANO.md gerado pelo modelo de fronteira
+e execução com modelo local. Medido em &lt;projeto-a&gt;: consumo de cota caiu de
+25% para 11% com resultado equivalente.
+
+Relacionado: [[cota-semanal-como-ler]], [[plano-executavel-formato]]
+EOF
+
+ls -R ~/base | head -20</code></pre>
+        <div class="px-5 py-3 border-t border-dark-600 text-sm text-neutral-400"><strong class="text-neutral-300">Como verificar:</strong> A pasta existe com a nota dentro. Abra num editor de markdown e confirme que o cabeçalho e os links aparecem como texto legível.</div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div class="bg-blue-900/20 rounded-xl border border-blue-500/30 p-6">
+          <h4 class="font-bold text-blue-400 mb-4">&#10003; Nota que serve a um agente</h4>
+          <ul class="space-y-3 text-neutral-300"><li class="flex items-start space-x-2"><span class="text-blue-400">&#10003;</span><span>Uma decisão ou fato por arquivo</span></li><li class="flex items-start space-x-2"><span class="text-blue-400">&#10003;</span><span>Data e projetos no cabeçalho</span></li><li class="flex items-start space-x-2"><span class="text-blue-400">&#10003;</span><span>O porquê, não só o quê</span></li><li class="flex items-start space-x-2"><span class="text-blue-400">&#10003;</span><span>Links para notas relacionadas</span></li></ul>
+        </div>
+        <div class="bg-red-900/20 rounded-xl border border-red-500/30 p-6">
+          <h4 class="font-bold text-red-400 mb-4">&#10007; Nota que atrapalha</h4>
+          <ul class="space-y-3 text-neutral-300"><li class="flex items-start space-x-2"><span class="text-red-400">&#10007;</span><span>Arquivo gigante com tudo</span></li><li class="flex items-start space-x-2"><span class="text-red-400">&#10007;</span><span>Sem data (o agente não sabe se ainda vale)</span></li><li class="flex items-start space-x-2"><span class="text-red-400">&#10007;</span><span>Só conclusão, sem contexto</span></li><li class="flex items-start space-x-2"><span class="text-red-400">&#10007;</span><span>Segredos e credenciais</span></li></ul>
+        </div>
+      </div>
+
+      <div class="bg-red-900/20 rounded-xl border border-red-500/30 p-6 mb-6">
+        <h3 class="text-lg font-semibold text-red-400 mb-3 flex items-center"><span class="mr-2">⚠️</span> Nota velha vira instrução errada</h3>
+        <p class="text-neutral-300" data-inema-block="m2-4-p3">Um agente lê a base como verdade. Nota sem data ou desatualizada faz ele recomendar um comando que não existe mais. Datar tudo e revisar o que envelhece é parte do custo dessa camada.</p>
+      </div>
+      
+      <button type="button" data-inema-read-toggle class="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors flex items-center space-x-2 justify-start">
+        <span class="inema-ico-todo" aria-hidden="true">&#9744;</span>
+        <span class="inema-ico-done" aria-hidden="true">&#9745;</span>
+        <span class="inema-label-todo">Marcar como lido</span>
+        <span class="inema-label-done">Lido</span>
+      </button>
+    </section>
+
+    <!-- TÓPICO 3 -->
+    <section id="topico-3" data-inema-topic="modulo-2-4#topico-3" class="mb-16">
+      <div class="flex items-center space-x-4 mb-6">
+        <span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl">3</span>
+        <h2 class="text-2xl font-bold">🔄 Conectar os agentes à base</h2>
+      </div>
+      <p class="text-neutral-300 mb-6 leading-relaxed" data-inema-block="m2-4-p4">Duas ligações. Na entrada: uma instrução permanente mandando consultar a base antes de decidir. Na saída: um pedido explícito de registrar o que foi decidido. A leitura pode ser por acesso direto ao disco (o agente já tem, se a pasta estiver no escopo) ou por um servidor MCP de sistema de arquivos, quando o agente roda fora da sua máquina.</p>
+
+      <div class="codebox bg-dark-800 rounded-xl border border-blue-500/30 overflow-hidden mb-6">
+        <div class="px-5 py-3 border-b border-dark-600 flex items-start justify-between gap-3 flex-wrap">
+          <div><p class="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-1">Copie e rode</p><p class="text-sm text-neutral-300">Instrução permanente que liga qualquer projeto à base</p></div>
+          <button type="button" data-copy class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors">Copiar</button>
+        </div>
+        <pre class="p-5 text-sm text-neutral-100 bg-dark-900/60 font-mono leading-relaxed"><code class="language-markdown">## Base de conhecimento
+
+Antes de decisões de arquitetura, escolha de ferramenta ou padrão de trabalho,
+consulte ~/base/ (markdown). Busque por termos do problema:
+
+    grep -ril "&lt;termo&gt;" ~/base/ | head -20
+
+Se encontrar nota relevante, cite o arquivo na sua resposta e siga a decisão
+registrada. Se a nota contradiz o que eu pedi agora, me avise antes de agir.
+
+Ao fim de uma tarefa que gerou decisão nova, proponha (não crie sozinho) uma
+nota em ~/base/decisoes/ no formato padrão, e me mostre o conteúdo.</code></pre>
+        <div class="px-5 py-3 border-t border-dark-600 text-sm text-neutral-400"><strong class="text-neutral-300">Como verificar:</strong> Sessão nova num projeto qualquer: peça uma decisão que já está na base. A resposta deve citar o arquivo. Se não citar, a instrução não está sendo lida ou a pasta está fora do escopo do sandbox.</div>
+      </div>
+
+      <div class="codebox bg-dark-800 rounded-xl border border-blue-500/30 overflow-hidden mb-6">
+        <div class="px-5 py-3 border-b border-dark-600 flex items-start justify-between gap-3 flex-wrap">
+          <div><p class="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-1">Copie e rode</p><p class="text-sm text-neutral-300">Dar acesso à base para um agente que roda em outra pasta</p></div>
+          <button type="button" data-copy class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors">Copiar</button>
+        </div>
+        <pre class="p-5 text-sm text-neutral-100 bg-dark-900/60 font-mono leading-relaxed"><code class="language-bash"># opção 1: incluir a pasta no escopo da sessão
+codex --add-dir ~/base "&lt;TAREFA&gt;"
+
+# opção 2: servidor MCP de sistema de arquivos limitado à base
+codex mcp add base -- &lt;COMANDO_DO_SERVIDOR_DE_ARQUIVOS&gt; ~/base
+codex mcp list</code></pre>
+        <div class="px-5 py-3 border-t border-dark-600 text-sm text-neutral-400"><strong class="text-neutral-300">Como verificar:</strong> Peça "liste os títulos das notas em ~/base/decisoes". Uma lista real confirma o acesso. Prefira acesso somente leitura quando o agente não precisa escrever.</div>
+      </div>
+
+      <div class="bg-primary/10 rounded-xl border border-primary/30 p-6 mb-6">
+        <h3 class="text-lg font-semibold text-primary mb-3 flex items-center"><span class="mr-2">💡</span> Propor, não escrever</h3>
+        <p class="text-neutral-300" data-inema-block="m2-4-p5">Deixe o agente propor a nota e você aprovar. Base escrita automaticamente acumula duplicata e conclusão errada, e a próxima sessão lê isso como verdade.</p>
+      </div>
+      
+      <button type="button" data-inema-read-toggle class="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors flex items-center space-x-2 justify-start">
+        <span class="inema-ico-todo" aria-hidden="true">&#9744;</span>
+        <span class="inema-ico-done" aria-hidden="true">&#9745;</span>
+        <span class="inema-label-todo">Marcar como lido</span>
+        <span class="inema-label-done">Lido</span>
+      </button>
+    </section>
+
+    <!-- TÓPICO 4 -->
+    <section id="topico-4" data-inema-topic="modulo-2-4#topico-4" class="mb-16">
+      <div class="flex items-center space-x-4 mb-6">
+        <span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl">4</span>
+        <h2 class="text-2xl font-bold">🕸️ Visualizar e revisar a base</h2>
+      </div>
+      <p class="text-neutral-300 mb-6 leading-relaxed" data-inema-block="m2-4-p6">Ferramentas de markdown com grafo mostram notas isoladas e aglomerados. Nota órfã costuma ser uma de duas coisas: ideia que nunca se conectou a nada (candidata a poda) ou assunto novo que ainda vai crescer. A revisão olha data e uso: o que não é citado nem atualizado há meses sai ou vira arquivo morto.</p>
+
+      <div class="codebox bg-dark-800 rounded-xl border border-blue-500/30 overflow-hidden mb-6">
+        <div class="px-5 py-3 border-b border-dark-600 flex items-start justify-between gap-3 flex-wrap">
+          <div><p class="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-1">Copie e rode</p><p class="text-sm text-neutral-300">Encontrar notas velhas e notas órfãs para revisar</p></div>
+          <button type="button" data-copy class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors">Copiar</button>
+        </div>
+        <pre class="p-5 text-sm text-neutral-100 bg-dark-900/60 font-mono leading-relaxed"><code class="language-bash"># notas não modificadas há mais de 180 dias
+find ~/base -name "*.md" -mtime +180 | head -30
+
+# notas que ninguém referencia (nenhum [[link]] aponta para elas)
+cd ~/base
+for f in $(find . -name "*.md"); do
+  n=$(basename "$f" .md)
+  grep -rql "\[\[$n\]\]" . &gt;/dev/null 2&gt;&amp;1 || echo "orfa: $f"
+done | head -30</code></pre>
+        <div class="px-5 py-3 border-t border-dark-600 text-sm text-neutral-400"><strong class="text-neutral-300">Como verificar:</strong> As duas listas cabem numa revisão de trinta minutos. Cada item: atualizar com data nova, ligar a outra nota, ou apagar. Nenhum item fica sem decisão.</div>
+      </div>
+
+      <div class="space-y-5 mb-6">
+        <h3 class="text-lg font-semibold text-blue-400 mb-2">Ritmo de revisão</h3>
+        
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center"><span class="text-blue-400 font-bold">1</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Semanal, 10 minutos</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m2-4-p7">Notas criadas na semana: cabeçalho completo? Ligadas a alguma coisa?</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center"><span class="text-blue-400 font-bold">2</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Mensal, 30 minutos</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m2-4-p8">Rode as duas buscas acima. Poda e religação.</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center"><span class="text-blue-400 font-bold">3</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Quando um agente errar</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m2-4-p9">Se a recomendação errada veio de uma nota, corrija a nota na hora. É o feedback mais valioso que a base recebe.</p>
+          </div>
+        </div>
+      </div>
+      
+      <button type="button" data-inema-read-toggle class="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors flex items-center space-x-2 justify-start">
+        <span class="inema-ico-todo" aria-hidden="true">&#9744;</span>
+        <span class="inema-ico-done" aria-hidden="true">&#9745;</span>
+        <span class="inema-label-todo">Marcar como lido</span>
+        <span class="inema-label-done">Lido</span>
+      </button>
+    </section>
+
+    <!-- TÓPICO 5 -->
+    <section id="topico-5" data-inema-topic="modulo-2-4#topico-5" class="mb-16">
+      <div class="flex items-center space-x-4 mb-6">
+        <span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl">5</span>
+        <h2 class="text-2xl font-bold">🏗️ O sistema completo</h2>
+      </div>
+      
+      <figure class="rounded-2xl border border-blue-500/30 bg-dark-900/40 p-3 sm:p-4 mb-6 overflow-hidden">
+        <svg viewBox="0 0 800 200" class="w-full h-auto" role="img" aria-label="O fluxo completo do sistema: consultar a base, escrever o contrato, delegar com skill ou MCP, verificar a prova, registrar a decisão na base"><defs>
+    <linearGradient id="s20-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#60a5fa"/><stop offset="1" stop-color="#3b82f6"/></linearGradient>
+    <filter id="s20-glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="1.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <pattern id="s20-grid" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="1.3" cy="1.3" r="1.3" fill="#3b82f6" opacity="0.14"/></pattern>
+  </defs><rect width="800" height="200" fill="url(#s20-grid)"/><g class="wf-a"><rect x="40" y="60" width="124.8" height="84" rx="12" fill="#1e3a8a" stroke="#3b82f6" stroke-width="1.8"/>
+        <circle cx="58" cy="78" r="10" fill="#3b82f6"/><text x="58" y="82" text-anchor="middle" fill="#0b1220" font-family="Inter,sans-serif" font-size="11" font-weight="700">1</text>
+        <text x="102.4" y="104" text-anchor="middle" fill="#bfdbfe" font-family="Inter,sans-serif" font-size="10.5" font-weight="700">Consultar base</text>
+        <text x="102.4" y="122" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5" font-weight="400">já decidimos isso?</text></g>
+        <path class="wf-flow" d="M166.8 102 L186.8 102" stroke="#38bdf8" stroke-width="2" fill="none"/><polygon points="182.8,97 182.8,107 188.8,102" fill="#38bdf8"/><g class="wf-a"><rect x="188.8" y="60" width="124.8" height="84" rx="12" fill="#0e1b26" stroke="#38bdf8" stroke-width="1.8"/>
+        <circle cx="206.8" cy="78" r="10" fill="#38bdf8"/><text x="206.8" y="82" text-anchor="middle" fill="#0b1220" font-family="Inter,sans-serif" font-size="11" font-weight="700">2</text>
+        <text x="251.20000000000002" y="104" text-anchor="middle" fill="#9ad6ff" font-family="Inter,sans-serif" font-size="10.5" font-weight="700">Contrato</text>
+        <text x="251.20000000000002" y="122" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5" font-weight="400">resultado, onde, prova</text></g>
+        <path class="wf-flow" d="M315.6 102 L335.6 102" stroke="#38bdf8" stroke-width="2" fill="none"/><polygon points="331.6,97 331.6,107 337.6,102" fill="#38bdf8"/><g class="wf-a"><rect x="337.6" y="60" width="124.8" height="84" rx="12" fill="#1e3a8a" stroke="#3b82f6" stroke-width="1.8"/>
+        <circle cx="355.6" cy="78" r="10" fill="#3b82f6"/><text x="355.6" y="82" text-anchor="middle" fill="#0b1220" font-family="Inter,sans-serif" font-size="11" font-weight="700">3</text>
+        <text x="400" y="104" text-anchor="middle" fill="#bfdbfe" font-family="Inter,sans-serif" font-size="10.5" font-weight="700">Delegar</text>
+        <text x="400" y="122" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5" font-weight="400">skill · MCP · tela · plano</text></g>
+        <path class="wf-flow" d="M464.40000000000003 102 L484.40000000000003 102" stroke="#38bdf8" stroke-width="2" fill="none"/><polygon points="480.40000000000003,97 480.40000000000003,107 486.40000000000003,102" fill="#38bdf8"/><g class="wf-a"><rect x="486.40000000000003" y="60" width="124.8" height="84" rx="12" fill="#0e1b26" stroke="#38bdf8" stroke-width="1.8"/>
+        <circle cx="504.40000000000003" cy="78" r="10" fill="#38bdf8"/><text x="504.40000000000003" y="82" text-anchor="middle" fill="#0b1220" font-family="Inter,sans-serif" font-size="11" font-weight="700">4</text>
+        <text x="548.8000000000001" y="104" text-anchor="middle" fill="#9ad6ff" font-family="Inter,sans-serif" font-size="10.5" font-weight="700">Verificar</text>
+        <text x="548.8000000000001" y="122" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5" font-weight="400">a prova, não o resumo</text></g>
+        <path class="wf-flow" d="M613.2 102 L633.2 102" stroke="#38bdf8" stroke-width="2" fill="none"/><polygon points="629.2,97 629.2,107 635.2,102" fill="#38bdf8"/><g class="wf-a"><rect x="635.2" y="60" width="124.8" height="84" rx="12" fill="#1e3a8a" stroke="#3b82f6" stroke-width="1.8"/>
+        <circle cx="653.2" cy="78" r="10" fill="#3b82f6"/><text x="653.2" y="82" text-anchor="middle" fill="#0b1220" font-family="Inter,sans-serif" font-size="11" font-weight="700">5</text>
+        <text x="697.6" y="104" text-anchor="middle" fill="#bfdbfe" font-family="Inter,sans-serif" font-size="10.5" font-weight="700">Registrar</text>
+        <text x="697.6" y="122" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5" font-weight="400">decisão nova na base</text></g>
+        
+      <text x="400" y="178" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="11" font-style="italic">O fluxo completo do sistema: consultar a base, escrever o contrato, delegar com skill ou MCP, verificar a prova, registrar a decisão na base</text></svg>
+        <figcaption class="text-xs text-neutral-400 mt-3 px-1"><strong class="text-blue-400">O que olhar:</strong> O último passo alimenta o primeiro. É isso que faz o sistema melhorar por uso em vez de repetir os mesmos erros em projetos diferentes.</figcaption>
+      </figure>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        
+        <div class="bg-dark-800 rounded-xl border border-dark-600 p-5">
+          <div class="text-2xl mb-2">🧭</div>
+          <h4 class="font-semibold text-blue-400 mb-2">Entrada</h4>
+          <p class="text-neutral-300 text-sm" data-inema-block="m2-4-p10">Base consultada e contrato escrito. Dois minutos que evitam meia hora de retrabalho.</p>
+        </div>
+        <div class="bg-dark-800 rounded-xl border border-dark-600 p-5">
+          <div class="text-2xl mb-2">⚙️</div>
+          <h4 class="font-semibold text-blue-400 mb-2">Execução</h4>
+          <p class="text-neutral-300 text-sm" data-inema-block="m2-4-p11">Skill quando o método é seu, MCP quando falta capacidade, tela quando não há alternativa, plano quando o volume é grande.</p>
+        </div>
+        <div class="bg-dark-800 rounded-xl border border-dark-600 p-5">
+          <div class="text-2xl mb-2">✅</div>
+          <h4 class="font-semibold text-blue-400 mb-2">Verificação</h4>
+          <p class="text-neutral-300 text-sm" data-inema-block="m2-4-p12">Git limpo antes, prova depois, rollback barato. Reprovar é normal e gera o critério da próxima rodada.</p>
+        </div>
+        <div class="bg-dark-800 rounded-xl border border-dark-600 p-5">
+          <div class="text-2xl mb-2">🧠</div>
+          <h4 class="font-semibold text-blue-400 mb-2">Registro</h4>
+          <p class="text-neutral-300 text-sm" data-inema-block="m2-4-p13">Decisão nova vira nota datada. Amanhã, outro agente em outro projeto começa sabendo.</p>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto rounded-xl border border-dark-600 mb-6">
+        <table class="w-full text-sm text-left">
+          
+          <thead class="bg-dark-800 text-blue-400"><tr><th class="px-4 py-3 font-semibold">Módulo</th><th class="px-4 py-3 font-semibold">O que entregou</th><th class="px-4 py-3 font-semibold">Onde entra no fluxo</th></tr></thead>
+          <tbody class="divide-y divide-dark-600"><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">1.1</td><td class="px-4 py-3 text-neutral-300">Loop e contrato de três linhas</td><td class="px-4 py-3 text-neutral-300">Entrada</td></tr><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">1.2</td><td class="px-4 py-3 text-neutral-300">Três superfícies, sandbox, AGENTS.md</td><td class="px-4 py-3 text-neutral-300">Entrada e execução</td></tr><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">1.3</td><td class="px-4 py-3 text-neutral-300">Computer use com rascunho e prova</td><td class="px-4 py-3 text-neutral-300">Execução</td></tr><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">1.4</td><td class="px-4 py-3 text-neutral-300">Iteração com git e critérios de aceite</td><td class="px-4 py-3 text-neutral-300">Verificação</td></tr><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">2.1</td><td class="px-4 py-3 text-neutral-300">Skills de ferramenta e de gosto</td><td class="px-4 py-3 text-neutral-300">Execução</td></tr><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">2.2</td><td class="px-4 py-3 text-neutral-300">MCP e tarefas longas com marcos</td><td class="px-4 py-3 text-neutral-300">Execução</td></tr><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">2.3</td><td class="px-4 py-3 text-neutral-300">Cota, esforço e orquestração</td><td class="px-4 py-3 text-neutral-300">Execução</td></tr><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">2.4</td><td class="px-4 py-3 text-neutral-300">Base em arquivos</td><td class="px-4 py-3 text-neutral-300">Entrada e registro</td></tr></tbody>
+        </table>
+      </div>
+      
+      <button type="button" data-inema-read-toggle class="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors flex items-center space-x-2 justify-start">
+        <span class="inema-ico-todo" aria-hidden="true">&#9744;</span>
+        <span class="inema-ico-done" aria-hidden="true">&#9745;</span>
+        <span class="inema-label-todo">Marcar como lido</span>
+        <span class="inema-label-done">Lido</span>
+      </button>
+    </section>
+
+    <!-- TÓPICO 6 -->
+    <section id="topico-6" data-inema-topic="modulo-2-4#topico-6" class="mb-16">
+      <div class="flex items-center space-x-4 mb-6">
+        <span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl">6</span>
+        <h2 class="text-2xl font-bold">🚀 Prática final: montar a base e fechar um ciclo</h2>
+      </div>
+      
+      <div class="space-y-5 mb-6">
+        <h3 class="text-lg font-semibold text-blue-400 mb-2">Roteiro (45 min)</h3>
+        
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center"><span class="text-blue-400 font-bold">1</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Crie a base</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m2-4-p14">As pastas do tópico 2 e três notas: uma decisão que você já tomou, uma preferência de trabalho, um aprendizado deste curso.</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center"><span class="text-blue-400 font-bold">2</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Conecte um projeto</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m2-4-p15">Bloco "Base de conhecimento" no AGENTS.md do repositório em que você mais trabalha.</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center"><span class="text-blue-400 font-bold">3</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Escolha uma tarefa real</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m2-4-p16">Algo que você faria hoje de qualquer jeito. Não invente exercício.</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center"><span class="text-blue-400 font-bold">4</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Rode o fluxo inteiro</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m2-4-p17">Consultar base, contrato, delegar, verificar prova, git commit.</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center"><span class="text-blue-400 font-bold">5</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Registre</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m2-4-p18">Peça ao agente a proposta de nota. Revise, corrija, salve com data.</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center"><span class="text-blue-400 font-bold">6</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Confirme o ciclo</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m2-4-p19">Sessão nova, pergunta relacionada. A resposta deve citar a nota que você acabou de salvar.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="codebox bg-dark-800 rounded-xl border border-blue-500/30 overflow-hidden mb-6">
+        <div class="px-5 py-3 border-b border-dark-600 flex items-start justify-between gap-3 flex-wrap">
+          <div><p class="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-1">Copie e rode</p><p class="text-sm text-neutral-300">Fechar o ciclo: pedir a nota da decisão que a tarefa gerou</p></div>
+          <button type="button" data-copy class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors">Copiar</button>
+        </div>
+        <pre class="p-5 text-sm text-neutral-100 bg-dark-900/60 font-mono leading-relaxed"><code class="language-text">A tarefa terminou e foi verificada. Proponha uma nota para ~/base/decisoes/ no formato padrão (cabeçalho com tipo, data e projetos), contendo:
+- a decisão em uma frase;
+- o contexto: qual problema levou a ela;
+- a evidência: o que foi medido ou observado;
+- o que NÃO fazer, aprendido nesta tarefa;
+- links para notas relacionadas que já existirem em ~/base/.
+
+Mostre o conteúdo. Não crie o arquivo até eu aprovar.</code></pre>
+        <div class="px-5 py-3 border-t border-dark-600 text-sm text-neutral-400"><strong class="text-neutral-300">Como verificar:</strong> A nota tem data e evidência concreta, não generalidade. Depois de salvar, abra uma sessão nova e faça uma pergunta relacionada: a resposta deve citar o arquivo pelo caminho.</div>
+      </div>
+
+      <div class="bg-primary/10 rounded-xl border border-primary/30 p-6 mb-6">
+        <h3 class="text-lg font-semibold text-primary mb-3 flex items-center"><span class="mr-2">💡</span> A primeira volta é a mais cara</h3>
+        <p class="text-neutral-300" data-inema-block="m2-4-p20">Montar base, conectar projeto e escrever a primeira nota leva quase uma hora. A segunda volta leva o tempo da tarefa mais dois minutos. É aí que o sistema começa a pagar.</p>
+      </div>
+      
+      <button type="button" data-inema-read-toggle class="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors flex items-center space-x-2 justify-start">
+        <span class="inema-ico-todo" aria-hidden="true">&#9744;</span>
+        <span class="inema-ico-done" aria-hidden="true">&#9745;</span>
+        <span class="inema-label-todo">Marcar como lido</span>
+        <span class="inema-label-done">Lido</span>
+      </button>
+    </section>
+
+    <!-- QUIZ -->
+    
+      <div class="bg-dark-800 rounded-2xl border border-blue-500/30 p-6 mb-6">
+        <h3 class="text-lg font-semibold text-blue-400 mb-1 flex items-center"><span class="mr-2">🧪</span> Teste rápido do módulo</h3>
+        <p class="text-sm text-neutral-400 mb-5">Três perguntas. Clique numa opção para ver a resposta.</p>
+        <div class="space-y-5">
+        
+          <div class="qz" data-q="1">
+            <p class="font-semibold text-neutral-100 mb-3">1. Por que markdown numa pasta e não um produto de memória fechado?</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-blue-500/40 transition-colors" data-ok="0">É mais bonito</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-blue-500/40 transition-colors" data-ok="1">Todo agente lê arquivo, versiona com git e não depende de um fornecedor</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-blue-500/40 transition-colors" data-ok="0">É mais rápido</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-blue-500/40 transition-colors" data-ok="0">Não precisa de disco</button>
+            </div>
+            <p class="qz-fb mt-3 text-sm text-neutral-300" data-text="O formato aberto é o que permite vários agentes diferentes usarem a mesma base."></p>
+          </div>
+          <div class="qz" data-q="2">
+            <p class="font-semibold text-neutral-100 mb-3">2. Qual é o risco de deixar o agente escrever na base sem revisão?</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-blue-500/40 transition-colors" data-ok="0">Fica lento</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-blue-500/40 transition-colors" data-ok="1">Duplicatas e conclusões erradas viram verdade para as próximas sessões</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-blue-500/40 transition-colors" data-ok="0">Ocupa disco</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-blue-500/40 transition-colors" data-ok="0">Nenhum</button>
+            </div>
+            <p class="qz-fb mt-3 text-sm text-neutral-300" data-text="A base é lida como fonte; nota errada propaga o erro para todos os agentes."></p>
+          </div>
+          <div class="qz" data-q="3">
+            <p class="font-semibold text-neutral-100 mb-3">3. Qual passo faz o sistema melhorar por uso?</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-blue-500/40 transition-colors" data-ok="0">Escrever o contrato</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-blue-500/40 transition-colors" data-ok="0">Delegar com skill</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-blue-500/40 transition-colors" data-ok="1">Registrar a decisão nova na base ao fim do ciclo</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-blue-500/40 transition-colors" data-ok="0">Verificar a prova</button>
+            </div>
+            <p class="qz-fb mt-3 text-sm text-neutral-300" data-text="O registro fecha o laço: a próxima tarefa, em outro projeto, começa sabendo."></p>
+          </div>
+        </div>
+      </div>
+
+    <!-- RESUMO DO MÓDULO -->
+    <section class="mb-12">
+      <div class="bg-gradient-to-br from-blue-900/40 via-dark-800 to-dark-800 rounded-xl border border-blue-500/30 p-8">
+        <h2 class="text-2xl font-bold mb-6 flex items-center"><span class="mr-3">📋</span> Resumo do módulo</h2>
+        <div class="space-y-4 mb-8">
+          <div class="flex items-start space-x-3"><span class="text-blue-400 mt-1">&#10003;</span><div><strong class="text-white">Memória em camadas</strong><span class="text-neutral-400"> - sessão, projeto, mapa do repo, base comum. Só a última atravessa ferramentas.</span></div></div><div class="flex items-start space-x-3"><span class="text-blue-400 mt-1">&#10003;</span><div><strong class="text-white">Formato aberto</strong><span class="text-neutral-400"> - markdown em pasta, uma ideia por arquivo, data e links. Sem segredos.</span></div></div><div class="flex items-start space-x-3"><span class="text-blue-400 mt-1">&#10003;</span><div><strong class="text-white">Ler e propor</strong><span class="text-neutral-400"> - instrução permanente para consultar antes de decidir; nota proposta, você aprova.</span></div></div><div class="flex items-start space-x-3"><span class="text-blue-400 mt-1">&#10003;</span><div><strong class="text-white">Revisar</strong><span class="text-neutral-400"> - notas velhas e órfãs saem ou se religam; nota errada corrigida na hora do erro.</span></div></div><div class="flex items-start space-x-3"><span class="text-blue-400 mt-1">&#10003;</span><div><strong class="text-white">O laço fechado</strong><span class="text-neutral-400"> - consultar, contratar, delegar, verificar, registrar. A volta seguinte é mais barata.</span></div></div>
+        </div>
+        
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a href="modulo-2-3.html" class="flex-1 text-center px-6 py-3 bg-dark-700 text-neutral-300 rounded-lg font-semibold hover:bg-dark-600 transition-colors">&#8592; Módulo 2.3</a>
+          <a href="../../index.html" class="flex-1 text-center px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-500 transition-colors">Início do curso &#8594;</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-dark-600 mt-16 py-8">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-neutral-500 text-sm space-y-2">
+      <p>GPT-6 Astra: operação técnica · Trilha 2 — Construir e escalar · 2026 ·
+        <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300">INEMA.CLUB</a> -
+        <a href="https://inema.pro" target="_blank" class="text-amber-700 dark:text-slate-300">PRO</a></p>
+      <p class="text-xs">Fontes: <a href="https://openai.com/index/gpt-6-astra/" target="_blank" class="text-sky-400 hover:text-sky-300">página de lançamento do GPT-6 Astra</a> (OpenAI) · <a href="https://developers.openai.com/codex/" target="_blank" class="text-sky-400 hover:text-sky-300">documentação do Codex</a> · <a href="https://www.remotion.dev/" target="_blank" class="text-sky-400 hover:text-sky-300">Remotion</a> · <a href="https://github.com/ahujasid/blender-mcp" target="_blank" class="text-sky-400 hover:text-sky-300">Blender MCP</a> · <a href="https://obsidian.md/" target="_blank" class="text-sky-400 hover:text-sky-300">Obsidian</a>. Comandos conferidos no Codex CLI 0.153 (set/2026). Versão leiga deste conteúdo: <a href="https://inematds.github.io/gpt6-astra/" target="_blank" class="text-sky-400 hover:text-sky-300">GPT-6 Astra na prática</a>.</p>
+    </div>
+  </footer>
+
+  <!-- SCRIPTS núcleo v1 -->
+  <script>
+    function toggleTopic(button) {
+      const topicItem = button.closest('.topic-item');
+      const explanation = topicItem.querySelector('.topic-explanation');
+      const moduleCard = button.closest('.bg-dark-800');
+      if (moduleCard) {
+        moduleCard.querySelectorAll('.topic-explanation.active').forEach(exp => {
+          if (exp !== explanation) { exp.classList.remove('active'); const b = exp.parentElement.querySelector('[aria-controls="' + exp.id + '"]'); if (b) b.setAttribute('aria-expanded', 'false'); }
+        });
+      }
+      const isOpen = explanation.classList.toggle('active');
+      button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    }
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+    const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+    const html = document.documentElement;
+    if (!html.classList.contains('dark')) { themeToggleDarkIcon.classList.remove('hidden'); } else { themeToggleLightIcon.classList.remove('hidden'); }
+    themeToggle.addEventListener('click', () => {
+      themeToggleDarkIcon.classList.toggle('hidden');
+      themeToggleLightIcon.classList.toggle('hidden');
+      html.classList.toggle('dark');
+      const dark = html.classList.contains('dark');
+      localStorage.setItem('theme', dark ? 'dark' : 'light');
+      if (window.INEMA && INEMA.setPref) { try { INEMA.setPref('theme', dark ? 'inema-dark' : 'claro'); } catch (e) {} }
+    });
+    function openModal(modalId) { const m = document.getElementById(modalId); if (m) { m.classList.remove('hidden'); document.body.style.overflow = 'hidden'; } }
+    function closeModal() { document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden')); document.body.style.overflow = 'auto'; }
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+    // Quiz inline (3 perguntas por módulo)
+    document.addEventListener('click', (e) => {
+      const opt = e.target.closest('.qz-opt'); if (!opt) return;
+      const qz = opt.closest('.qz'); if (!qz || qz.hasAttribute('data-answered')) return;
+      const ok = opt.getAttribute('data-ok') === '1';
+      qz.querySelectorAll('.qz-opt').forEach(o => { o.setAttribute('data-state', o.getAttribute('data-ok') === '1' ? 'ok' : (o === opt ? 'no' : '')); o.disabled = true; });
+      qz.setAttribute('data-answered', ok ? 'ok' : 'no');
+      const fb = qz.querySelector('.qz-fb'); if (fb) fb.textContent = (ok ? '✓ Certo. ' : '✗ Não é essa. ') + (fb.getAttribute('data-text') || '');
+    });
+    // Copiar código
+    document.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-copy]'); if (!b) return;
+      const pre = b.closest('.codebox').querySelector('pre');
+      navigator.clipboard && navigator.clipboard.writeText(pre.innerText).then(() => { const t = b.textContent; b.textContent = 'Copiado ✓'; setTimeout(() => b.textContent = t, 1600); });
+    });
+  </script>
+
+  <script src="../../assets/learn.js"></script>
+  <script>
+    if (window.INEMA && typeof window.INEMA.init === 'function') { window.INEMA.init(); }
+  </script>
+</body>
+</html>

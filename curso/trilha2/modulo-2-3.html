@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="inema-course" content="gpt6astratec">
+  <title>Cota, custo e orquestração | GPT-6 Astra: operação técnica</title>
+  <meta name="description" content="Quarenta minutos de trabalho intenso consumiram cerca de um quarto da cota semanal. Isso não é problema se você souber ler o medidor e separar o que exige o modelo de fronteira do que não exige. Este módulo cobre leitura de cota, previsão, e o padrão de orquestração que multiplica o alcance da mesma assinatura.">
+
+  <!-- ANTI-FOUC: bloqueante, antes de tudo -->
+  <script>
+(function () {
+  try {
+    var html = document.documentElement;
+    var DEF = { theme: 'inema-dark', font: 'inter', fontScale: 100, lineWidth: 68, leading: 1.7, accent: 'emerald' };
+    function clone(o) { var r = {}; for (var x in o) r[x] = o[x]; return r; }
+    var p = clone(DEF);
+    try {
+      var raw = localStorage.getItem('inema.prefs');
+      if (raw) { var parsed = JSON.parse(raw); if (parsed && typeof parsed === 'object') { for (var k in DEF) if (parsed[k] != null) p[k] = parsed[k]; } }
+      else { var legacy = localStorage.getItem('theme'); if (legacy === 'light') p.theme = 'claro'; else if (legacy === 'dark') p.theme = 'inema-dark'; }
+    } catch (e) { p = clone(DEF); }
+    var THEMES = { 'inema-dark': { dark: true, attr: null, cs: 'dark' }, 'claro': { dark: false, attr: null, cs: 'light' }, 'sepia': { dark: false, attr: 'sepia', cs: 'light' }, 'foco': { dark: null, attr: 'foco', cs: null }, 'contraste': { dark: true, attr: 'contraste', cs: 'dark' } };
+    var t = THEMES[p.theme] || THEMES['inema-dark'];
+    if (t.dark === true) html.classList.add('dark'); else if (t.dark === false) html.classList.remove('dark');
+    if (t.attr) html.setAttribute('data-theme', t.attr); else html.removeAttribute('data-theme');
+    html.style.colorScheme = (t.cs ? t.cs : (html.classList.contains('dark') ? 'dark' : 'light'));
+    html.setAttribute('data-font', p.font || 'inter'); html.setAttribute('data-accent', p.accent || 'emerald');
+    var s = html.style; var scale = (+p.fontScale || 100);
+    s.setProperty('--inema-font-scale', (scale / 100).toString()); s.setProperty('font-size', scale + '%');
+    s.setProperty('--measure', (+p.lineWidth || 68) + 'ch'); s.setProperty('--lh-body', (+p.leading || 1.7).toString());
+    var fam = p.font === 'system' ? 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif' : (p.font === 'leitura' ? '"Atkinson Hyperlegible", "Inter", system-ui, sans-serif' : '"Inter", system-ui, sans-serif');
+    s.setProperty('--font-body', fam);
+    var ACC = { emerald: [152, 76, 45], blue: [217, 91, 60], purple: [258, 90, 66], amber: [38, 92, 50], teal: [174, 72, 41], rose: [350, 89, 60] };
+    var a = ACC[p.accent] || ACC.emerald;
+    s.setProperty('--accent-h', a[0] + ''); s.setProperty('--accent-s', a[1] + '%'); s.setProperty('--accent-l', a[2] + '%');
+    s.setProperty('--accent', 'hsl(' + a[0] + ' ' + a[1] + '% ' + a[2] + '%)');
+  } catch (err) { try { document.documentElement.classList.add('dark'); document.documentElement.style.colorScheme = 'dark'; } catch (e) {} }
+})();
+</script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class', theme: { extend: { colors: { primary: '#FACC15', dark: { 900: '#111827', 800: '#1f2937', 700: '#374151', 600: '#4b5563' } } } } }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/learn.css">
+
+  <!-- Manifesto do curso (obrigatório em toda página) -->
+  <script type="application/json" data-inema-manifest>
+{
+ "course": "gpt6astratec",
+ "tracks": [
+  {
+   "n": "1",
+   "title": "Setup e operação",
+   "modules": [
+    {
+     "id": "1-1",
+     "title": "O que o Astra muda no loop de trabalho",
+     "topics": 6,
+     "href": "curso/trilha1/modulo-1-1.html"
+    },
+    {
+     "id": "1-2",
+     "title": "Ativando: app, Codex e CLI",
+     "topics": 6,
+     "href": "curso/trilha1/modulo-1-2.html"
+    },
+    {
+     "id": "1-3",
+     "title": "Computer use no navegador",
+     "topics": 6,
+     "href": "curso/trilha1/modulo-1-3.html"
+    },
+    {
+     "id": "1-4",
+     "title": "Codar com o Astra: trocar, refatorar, rollback",
+     "topics": 6,
+     "href": "curso/trilha1/modulo-1-4.html"
+    }
+   ]
+  },
+  {
+   "n": "2",
+   "title": "Construir e escalar",
+   "modules": [
+    {
+     "id": "2-1",
+     "title": "Skills: ensinar a ferramenta e o gosto",
+     "topics": 6,
+     "href": "curso/trilha2/modulo-2-1.html"
+    },
+    {
+     "id": "2-2",
+     "title": "MCP e trabalhos longos",
+     "topics": 6,
+     "href": "curso/trilha2/modulo-2-2.html"
+    },
+    {
+     "id": "2-3",
+     "title": "Cota, custo e orquestração",
+     "topics": 6,
+     "href": "curso/trilha2/modulo-2-3.html"
+    },
+    {
+     "id": "2-4",
+     "title": "Memória compartilhada e o sistema completo",
+     "topics": 6,
+     "href": "curso/trilha2/modulo-2-4.html"
+    }
+   ]
+  }
+ ]
+}
+  </script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .dark body { background-color: #111827; }
+    .topic-explanation { display: none; }
+    .topic-explanation.active { display: block; }
+    html { scroll-behavior: smooth; }
+    [id] { scroll-margin-top: 5rem; }
+
+    /* Light mode overrides */
+    html:not(.dark) body { background-color: #f8fafc; }
+    html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+    html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+    html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+    html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+    html:not(.dark) .bg-dark-800\/50, html:not(.dark) .bg-dark-800\/60, html:not(.dark) .bg-dark-900\/40, html:not(.dark) .bg-dark-900\/60 { background-color: #f3f4f6; }
+    html:not(.dark) .text-neutral-100 { color: #111827; }
+    html:not(.dark) .text-white { color: #111827; }
+    html:not(.dark) .text-neutral-300 { color: #4b5563; }
+    html:not(.dark) .text-neutral-400 { color: #6b7280; }
+    html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+    html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+    html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+    
+    html:not(.dark) .text-emerald-400 { color: #059669; }
+    html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5, 150, 105, 0.12); }
+    html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5, 150, 105, 0.08); }
+    html:not(.dark) .bg-emerald-900\/20 { background-color: rgba(5, 150, 105, 0.07); }
+    html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5, 150, 105, 0.25); }
+    html:not(.dark) .hover\:bg-emerald-500\/30:hover { background-color: rgba(5, 150, 105, 0.18); }
+    html:not(.dark) .hover\:text-emerald-400:hover { color: #059669; }
+    html:not(.dark) .hover\:bg-emerald-500\/10:hover { background-color: rgba(5, 150, 105, 0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-emerald-400 { color: #059669; }
+
+    html:not(.dark) .text-blue-400 { color: #2563eb; }
+    html:not(.dark) .bg-blue-500\/20 { background-color: rgba(37, 99, 235, 0.12); }
+    html:not(.dark) .bg-blue-500\/10 { background-color: rgba(37, 99, 235, 0.08); }
+    html:not(.dark) .bg-blue-900\/20 { background-color: rgba(37, 99, 235, 0.07); }
+    html:not(.dark) .border-blue-500\/30 { border-color: rgba(37, 99, 235, 0.25); }
+    html:not(.dark) .hover\:bg-blue-500\/30:hover { background-color: rgba(37, 99, 235, 0.18); }
+    html:not(.dark) .hover\:text-blue-400:hover { color: #2563eb; }
+    html:not(.dark) .hover\:bg-blue-500\/10:hover { background-color: rgba(37, 99, 235, 0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-blue-400 { color: #2563eb; }
+
+    html:not(.dark) .text-purple-400 { color: #7c3aed; }
+    html:not(.dark) .bg-purple-500\/20 { background-color: rgba(124, 58, 237, 0.12); }
+    html:not(.dark) .bg-purple-500\/10 { background-color: rgba(124, 58, 237, 0.08); }
+    html:not(.dark) .bg-purple-900\/20 { background-color: rgba(124, 58, 237, 0.07); }
+    html:not(.dark) .border-purple-500\/30 { border-color: rgba(124, 58, 237, 0.25); }
+    html:not(.dark) .hover\:bg-purple-500\/30:hover { background-color: rgba(124, 58, 237, 0.18); }
+    html:not(.dark) .hover\:text-purple-400:hover { color: #7c3aed; }
+    html:not(.dark) .hover\:bg-purple-500\/10:hover { background-color: rgba(124, 58, 237, 0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-purple-400 { color: #7c3aed; }
+
+    html:not(.dark) .text-amber-400 { color: #92400e; }
+    html:not(.dark) .bg-amber-500\/20 { background-color: rgba(146, 64, 14, 0.12); }
+    html:not(.dark) .bg-amber-500\/10 { background-color: rgba(146, 64, 14, 0.08); }
+    html:not(.dark) .bg-amber-900\/20 { background-color: rgba(146, 64, 14, 0.07); }
+    html:not(.dark) .border-amber-500\/30 { border-color: rgba(146, 64, 14, 0.25); }
+    html:not(.dark) .hover\:bg-amber-500\/30:hover { background-color: rgba(146, 64, 14, 0.18); }
+    html:not(.dark) .hover\:text-amber-400:hover { color: #92400e; }
+    html:not(.dark) .hover\:bg-amber-500\/10:hover { background-color: rgba(146, 64, 14, 0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-amber-400 { color: #92400e; }
+
+    html:not(.dark) .text-red-400 { color: #b91c1c; }
+    html:not(.dark) .bg-red-500\/20 { background-color: rgba(185, 28, 28, 0.12); }
+    html:not(.dark) .bg-red-500\/10 { background-color: rgba(185, 28, 28, 0.08); }
+    html:not(.dark) .bg-red-900\/20 { background-color: rgba(185, 28, 28, 0.07); }
+    html:not(.dark) .border-red-500\/30 { border-color: rgba(185, 28, 28, 0.25); }
+    html:not(.dark) .hover\:bg-red-500\/30:hover { background-color: rgba(185, 28, 28, 0.18); }
+    html:not(.dark) .hover\:text-red-400:hover { color: #b91c1c; }
+    html:not(.dark) .hover\:bg-red-500\/10:hover { background-color: rgba(185, 28, 28, 0.08); }
+    html:not(.dark) .group:hover .group-hover\:text-red-400 { color: #b91c1c; }
+    html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+    html:not(.dark) .text-primary { color: #a16207; }
+    html:not(.dark) .bg-primary\/10 { background-color: rgba(161, 98, 7, 0.08); }
+    html:not(.dark) .border-primary\/30 { border-color: rgba(161, 98, 7, 0.25); }
+    html:not(.dark) .text-sky-400 { color: #0369a1; }
+    html:not(.dark) .text-yellow-400 { color: #a16207; }
+    html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+    html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+    html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95); }
+    html:not(.dark) .text-amber-700 { color: #92400e; }
+
+    /* Dark mode - bordas suaves */
+    .dark .border-dark-600 { border-color: #374151; }
+    .dark .divide-dark-600 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+
+    /* SVG */
+    html:not(.dark) svg[role="img"] { filter: saturate(0.82) brightness(0.96); }
+    @keyframes wf-pulse { 0%,100% { opacity:.55 } 50% { opacity:1 } }
+    @keyframes wf-flow { to { stroke-dashoffset: -28; } }
+    @media (prefers-reduced-motion: no-preference) {
+      .wf-a { animation: wf-pulse 2.6s ease-in-out infinite; }
+      .wf-a:nth-child(2){animation-delay:.25s} .wf-a:nth-child(3){animation-delay:.5s}
+      .wf-a:nth-child(4){animation-delay:.75s} .wf-a:nth-child(5){animation-delay:1s} .wf-a:nth-child(6){animation-delay:1.25s}
+      .wf-flow { stroke-dasharray: 6 8; animation: wf-flow 1.4s linear infinite; }
+    }
+
+    /* Quiz */
+    .qz-opt[data-state="ok"] { border-color: #10b981; background: rgba(16,185,129,.15); }
+    .qz-opt[data-state="no"] { border-color: #ef4444; background: rgba(239,68,68,.12); }
+    .qz-fb { display:none; } .qz[data-answered] .qz-fb { display:block; }
+
+    /* TOC do módulo é um bloco inline, não uma barra lateral sticky */
+    [data-inema-toc] { position: static !important; top: auto !important; max-height: none !important; }
+    /* Painel de aparência (classes internas) */
+    .inema-appearance-sec { margin-bottom: .75rem; }
+    .inema-appearance-label { font-size: .7rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #9ca3af; margin-bottom: .35rem; }
+    .inema-appearance-row { display: flex; flex-wrap: wrap; gap: .35rem; }
+    .inema-chip { font-size: .8rem; padding: .3rem .65rem; border-radius: .5rem; border: 1px solid #374151; background: rgba(31,41,55,.6); color: #e5e7eb; cursor: pointer; }
+    .inema-chip:hover { border-color: #FACC15; }
+    .inema-chip[aria-pressed="true"], .inema-chip.is-active { background: rgba(250,204,21,.15); border-color: #FACC15; color: #FACC15; }
+    html:not(.dark) .inema-chip { background: #f3f4f6; color: #111827; border-color: #d1d5db; }
+    html:not(.dark) .inema-chip[aria-pressed="true"], html:not(.dark) .inema-chip.is-active { background: rgba(161,98,7,.1); border-color: #a16207; color: #a16207; }
+    /* Code box */
+    .codebox pre { white-space: pre-wrap; word-break: break-word; }
+    
+  </style>
+</head>
+<body class="bg-dark-900 text-neutral-100 min-h-screen">
+
+  <!-- NAVIGATION -->
+  <nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-14">
+        <div class="flex items-center space-x-3">
+          <a href="../../index.html" class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300">
+            <span class="text-2xl">⚙️</span>
+            <span class="font-bold text-lg hidden md:inline">Astra técnico</span>
+          </a>
+          <span class="text-neutral-600">|</span>
+          <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300 text-sm font-medium">INEMA.CLUB</a>
+          <span class="text-neutral-600 hidden sm:inline">-</span>
+          <a href="https://inema.pro" target="_blank" class="text-amber-700 dark:text-slate-300 hover:opacity-80 text-sm font-medium hidden sm:inline">PRO</a>
+        </div>
+        <div class="flex items-center space-x-1 sm:space-x-2">
+          <a href="../../curso/trilha1/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors">
+            <span class="sm:hidden">T1</span>
+            <span class="hidden sm:inline">Setup</span>
+          </a>
+          <a href="../../curso/trilha2/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-blue-400 bg-blue-500/10">
+            <span class="sm:hidden">T2</span>
+            <span class="hidden sm:inline">Escalar</span>
+          </a>
+          <button type="button" data-inema-journey-open class="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-primary bg-primary/10 hover:bg-primary/20 transition-colors">
+            <span>🧭</span><span>Minha jornada</span>
+            <span data-inema-journey-badge class="text-xs px-1.5 py-0.5 rounded-full bg-primary/20"></span>
+          </button>
+          <button type="button" data-inema-appearance-toggle="[data-inema-appearance]" aria-expanded="false" class="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" title="Aparência e leitura">
+            <span aria-hidden="true">Aa</span>
+          </button>
+          <button id="theme-toggle" class="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors" title="Tema claro/escuro">
+            <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+            <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+  
+  <div data-inema-appearance class="inema-appearance-pop" role="region" aria-label="Aparência e leitura">
+    <div class="inema-appearance-sec">
+      <p class="inema-appearance-label">Tema</p>
+      <div class="inema-appearance-row">
+        <button type="button" data-inema-set-theme="inema-dark" class="inema-chip">Escuro</button>
+        <button type="button" data-inema-set-theme="claro" class="inema-chip">Claro</button>
+        <button type="button" data-inema-set-theme="sepia" class="inema-chip">Sépia</button>
+        <button type="button" data-inema-set-theme="foco" class="inema-chip">Foco</button>
+        <button type="button" data-inema-set-theme="contraste" class="inema-chip">Contraste</button>
+      </div>
+    </div>
+    <div class="inema-appearance-sec">
+      <p class="inema-appearance-label">Tamanho do texto</p>
+      <div class="inema-appearance-row">
+        <button type="button" data-inema-set-fontscale="90" class="inema-chip">A-</button>
+        <button type="button" data-inema-set-fontscale="100" class="inema-chip">A</button>
+        <button type="button" data-inema-set-fontscale="115" class="inema-chip">A+</button>
+        <button type="button" data-inema-set-fontscale="130" class="inema-chip">A++</button>
+      </div>
+    </div>
+    <div class="inema-appearance-sec">
+      <p class="inema-appearance-label">Fonte</p>
+      <div class="inema-appearance-row">
+        <button type="button" data-inema-set-font="inter" class="inema-chip">Inter</button>
+        <button type="button" data-inema-set-font="system" class="inema-chip">Sistema</button>
+        <button type="button" data-inema-set-font="leitura" class="inema-chip">Leitura</button>
+      </div>
+    </div>
+    <div class="inema-appearance-sec">
+      <p class="inema-appearance-label">Entrelinha</p>
+      <div class="inema-appearance-row">
+        <button type="button" data-inema-set-leading="1.5" class="inema-chip">Compacta</button>
+        <button type="button" data-inema-set-leading="1.7" class="inema-chip">Normal</button>
+        <button type="button" data-inema-set-leading="1.9" class="inema-chip">Ampla</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BREADCRUMB -->
+  <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div class="flex items-center space-x-2 text-sm text-neutral-400">
+      <a href="../../index.html" class="hover:text-blue-400">Início</a><span>/</span>
+      <a href="index.html" class="hover:text-blue-400">Trilha 2</a><span>/</span>
+      <span class="text-blue-400">Módulo 2.3</span>
+    </div>
+  </nav>
+
+  <!-- HEADER -->
+  <header class="bg-gradient-to-br from-blue-900/30 via-dark-800 to-dark-800 py-12 border-b border-dark-600">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <span class="inline-block px-3 py-1 bg-blue-500/20 text-blue-400 text-xs font-semibold rounded-full mb-4">MÓDULO 2.3</span>
+      <h1 class="text-3xl sm:text-4xl font-bold mb-4">📉 Cota, custo e orquestração</h1>
+      <p class="text-lg text-neutral-400 max-w-3xl">Quarenta minutos de trabalho intenso consumiram cerca de um quarto da cota semanal. Isso não é problema se você souber ler o medidor e separar o que exige o modelo de fronteira do que não exige. Este módulo cobre leitura de cota, previsão, e o padrão de orquestração que multiplica o alcance da mesma assinatura.</p>
+      
+      <div class="grid grid-cols-4 gap-4 mt-8 max-w-2xl">
+        <div class="bg-dark-800/50 rounded-lg p-3 border border-dark-600"><div class="text-xl font-bold text-blue-400">6</div><div class="text-xs text-neutral-400">Tópicos</div></div><div class="bg-dark-800/50 rounded-lg p-3 border border-dark-600"><div class="text-xl font-bold text-blue-400">40</div><div class="text-xs text-neutral-400">Minutos</div></div><div class="bg-dark-800/50 rounded-lg p-3 border border-dark-600"><div class="text-xl font-bold text-blue-400">Intermediário</div><div class="text-xs text-neutral-400">Nível</div></div><div class="bg-dark-800/50 rounded-lg p-3 border border-dark-600"><div class="text-xl font-bold text-blue-400">Prática</div><div class="text-xs text-neutral-400">Tipo</div></div>
+      </div>
+      <div data-inema-meter="modulo:2-3" class="inema-meter max-w-md mt-6" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Progresso do módulo">
+        <div class="flex justify-between text-sm text-neutral-400 mb-1"><span data-inema-meter-frac>0 de 6</span><span data-inema-meter-pct>0%</span></div>
+        <div class="inema-bar h-2 bg-dark-700 rounded-full overflow-hidden"><div class="inema-bar__fill h-full bg-blue-500 rounded-full transition-all" data-inema-meter-fill style="width:0%"></div></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 inema-prose" data-inema-module="2-3" data-inema-track="2">
+    <nav aria-label="Tópicos deste módulo" class="mb-12 bg-dark-800 rounded-xl border border-dark-600 p-5" data-inema-toc>
+      <p class="text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-3">Neste módulo</p>
+      <ol class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+        <li><a href="#topico-1" class="flex items-start gap-2 text-neutral-300 hover:text-blue-400"><span class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">1</span><span>Ler o medidor antes de precisar dele</span></a></li><li><a href="#topico-2" class="flex items-start gap-2 text-neutral-300 hover:text-blue-400"><span class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">2</span><span>Escolher o esforço certo para cada tarefa</span></a></li><li><a href="#topico-3" class="flex items-start gap-2 text-neutral-300 hover:text-blue-400"><span class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">3</span><span>Orquestração: o caro planeja, o barato executa</span></a></li><li><a href="#topico-4" class="flex items-start gap-2 text-neutral-300 hover:text-blue-400"><span class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">4</span><span>Ligar o Astra aos seus agentes sem chave de API</span></a></li><li><a href="#topico-5" class="flex items-start gap-2 text-neutral-300 hover:text-blue-400"><span class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">5</span><span>Reduzir custo sem reduzir trabalho</span></a></li><li><a href="#topico-6" class="flex items-start gap-2 text-neutral-300 hover:text-blue-400"><span class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">6</span><span>Prática: medir, planejar, orquestrar</span></a></li>
+      </ol>
+    </nav>
+
+    <!-- TÓPICO 1 -->
+    <section id="topico-1" data-inema-topic="modulo-2-3#topico-1" class="mb-16">
+      <div class="flex items-center space-x-4 mb-6">
+        <span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl">1</span>
+        <h2 class="text-2xl font-bold">📊 Ler o medidor antes de precisar dele</h2>
+      </div>
+      <p class="text-neutral-300 mb-6 leading-relaxed" data-inema-block="m2-3-p1">O Codex mostra o consumo por janela: uma de curto prazo e outra semanal, com data de reinício. Numa sessão de trabalho pesado, a semanal caiu cerca de 25 pontos em quarenta minutos. A leitura útil não é o número absoluto: é a taxa. Percentual consumido dividido pelo tempo de trabalho dá quantas horas de trabalho pesado ainda cabem na semana.</p>
+
+      <div class="codebox bg-dark-800 rounded-xl border border-blue-500/30 overflow-hidden mb-6">
+        <div class="px-5 py-3 border-b border-dark-600 flex items-start justify-between gap-3 flex-wrap">
+          <div><p class="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-1">Copie e rode</p><p class="text-sm text-neutral-300">Estimativa rápida de autonomia a partir de duas leituras do medidor</p></div>
+          <button type="button" data-copy class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors">Copiar</button>
+        </div>
+        <pre class="p-5 text-sm text-neutral-100 bg-dark-900/60 font-mono leading-relaxed"><code class="language-bash"># anote dois pares (percentual restante, minutos de trabalho pesado) no mesmo dia
+# exemplo: 90% às 0 min, 75% aos 40 min
+# taxa = (90 - 75) / 40 = 0,375 pontos por minuto
+# autonomia restante = 75 / 0,375 = 200 minutos de trabalho pesado
+
+python3 -c "
+p0, m0 = 90, 0
+p1, m1 = 75, 40
+taxa = (p0 - p1) / (m1 - m0)
+print(f'taxa: {taxa:.2f} pontos/min')
+print(f'restam ~{p1/taxa:.0f} min de trabalho pesado')
+"</code></pre>
+        <div class="px-5 py-3 border-t border-dark-600 text-sm text-neutral-400"><strong class="text-neutral-300">Como verificar:</strong> Compare a previsão com o consumo real no dia seguinte. Se errou muito, sua mistura de tarefas mudou: tarefas com computer use e MCP consomem bem mais que edição de texto.</div>
+      </div>
+
+      <div class="bg-blue-900/20 rounded-xl border border-blue-500/30 p-6 mb-6">
+        <h3 class="text-lg font-semibold text-blue-400 mb-4 flex items-center"><span class="mr-2">📊</span> O que puxa a cota para baixo</h3>
+        <ul class="space-y-3 text-neutral-300"><li class="flex items-start space-x-2"><span class="text-blue-400 mt-1">&#8226;</span><span>Computer use: cada passo carrega uma captura de tela para o modelo. É o mais caro por minuto.</span></li><li class="flex items-start space-x-2"><span class="text-blue-400 mt-1">&#8226;</span><span>Esforço de raciocínio alto: mais tokens de raciocínio na mesma tarefa.</span></li><li class="flex items-start space-x-2"><span class="text-blue-400 mt-1">&#8226;</span><span>Tarefas longas com MCP: dezenas de chamadas e retornos no mesmo contexto.</span></li><li class="flex items-start space-x-2"><span class="text-blue-400 mt-1">&#8226;</span><span>Contexto grande: repositório inteiro lido a cada sessão nova em vez de reconhecimento salvo.</span></li></ul>
+      </div>
+
+      <figure class="rounded-2xl border border-blue-500/30 bg-dark-900/40 p-3 sm:p-4 mb-6 overflow-hidden">
+        <svg viewBox="0 0 800 360" class="w-full h-auto" role="img" aria-label="Consumo da cota semanal ao longo de uma semana de trabalho, com e sem orquestração"><defs>
+    <linearGradient id="s17-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#60a5fa"/><stop offset="1" stop-color="#3b82f6"/></linearGradient>
+    <filter id="s17-glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="1.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <pattern id="s17-grid" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="1.3" cy="1.3" r="1.3" fill="#3b82f6" opacity="0.14"/></pattern>
+  </defs><rect width="800" height="360" fill="url(#s17-grid)"/>
+      <line x1="90" y1="300" x2="760" y2="300" stroke="#9ca3af" stroke-width="1.5"/><line x1="90" y1="300" x2="90" y2="50" stroke="#9ca3af" stroke-width="1.5"/>
+      <text x="90" y="322" text-anchor="middle" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="12" font-weight="600">seg</text><text x="257.5" y="322" text-anchor="middle" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="12" font-weight="600">ter</text><text x="425" y="322" text-anchor="middle" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="12" font-weight="600">qua</text><text x="592.5" y="322" text-anchor="middle" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="12" font-weight="600">qui</text><text x="760" y="322" text-anchor="middle" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="12" font-weight="600">sex</text>
+      <text x="78" y="175" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="10" transform="rotate(-90 78 175)">% consumido</text>
+      <path d="M90 237.5 L257.5 175 L425 120 L592.5 75 L760 50" fill="none" stroke="#60a5fa" stroke-width="3" filter="url(#s17-glow)"/>
+        <circle cx="90" cy="237.5" r="5" fill="#60a5fa"/><text x="90" y="225.5" text-anchor="middle" fill="#60a5fa" font-family="Inter,sans-serif" font-size="11" font-weight="700">25</text><circle cx="257.5" cy="175" r="5" fill="#60a5fa"/><text x="257.5" y="163" text-anchor="middle" fill="#60a5fa" font-family="Inter,sans-serif" font-size="11" font-weight="700">50</text><circle cx="425" cy="120" r="5" fill="#60a5fa"/><text x="425" y="108" text-anchor="middle" fill="#60a5fa" font-family="Inter,sans-serif" font-size="11" font-weight="700">72</text><circle cx="592.5" cy="75" r="5" fill="#60a5fa"/><text x="592.5" y="63" text-anchor="middle" fill="#60a5fa" font-family="Inter,sans-serif" font-size="11" font-weight="700">90</text><circle cx="760" cy="50" r="5" fill="#60a5fa"/><text x="760" y="38" text-anchor="middle" fill="#60a5fa" font-family="Inter,sans-serif" font-size="11" font-weight="700">acabou</text>
+        <text x="766" y="54" fill="#60a5fa" font-family="Inter,sans-serif" font-size="11" font-weight="600">tudo no modelo de fronteira</text><path d="M90 270 L257.5 240 L425 215 L592.5 190 L760 162.5" fill="none" stroke="#38bdf8" stroke-width="3" filter="url(#s17-glow)"/>
+        <circle cx="90" cy="270" r="5" fill="#38bdf8"/><text x="90" y="258" text-anchor="middle" fill="#38bdf8" font-family="Inter,sans-serif" font-size="11" font-weight="700">12</text><circle cx="257.5" cy="240" r="5" fill="#38bdf8"/><text x="257.5" y="228" text-anchor="middle" fill="#38bdf8" font-family="Inter,sans-serif" font-size="11" font-weight="700">24</text><circle cx="425" cy="215" r="5" fill="#38bdf8"/><text x="425" y="203" text-anchor="middle" fill="#38bdf8" font-family="Inter,sans-serif" font-size="11" font-weight="700">34</text><circle cx="592.5" cy="190" r="5" fill="#38bdf8"/><text x="592.5" y="178" text-anchor="middle" fill="#38bdf8" font-family="Inter,sans-serif" font-size="11" font-weight="700">44</text><circle cx="760" cy="162.5" r="5" fill="#38bdf8"/><text x="760" y="150.5" text-anchor="middle" fill="#38bdf8" font-family="Inter,sans-serif" font-size="11" font-weight="700">55</text>
+        <text x="766" y="166.5" fill="#38bdf8" font-family="Inter,sans-serif" font-size="11" font-weight="600">com orquestração</text><text x="400" y="350" text-anchor="middle" fill="#9ca3af" font-family="Inter,sans-serif" font-size="11" font-style="italic">Consumo da cota semanal ao longo de uma semana de trabalho, com e sem orquestração</text></svg>
+        <figcaption class="text-xs text-neutral-400 mt-3 px-1"><strong class="text-blue-400">O que olhar:</strong> Mesma quantidade de trabalho, duas curvas. A diferença é o que foi delegado para modelos mais baratos, não menos trabalho feito.</figcaption>
+      </figure>
+      
+      <button type="button" data-inema-read-toggle class="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors flex items-center space-x-2 justify-start">
+        <span class="inema-ico-todo" aria-hidden="true">&#9744;</span>
+        <span class="inema-ico-done" aria-hidden="true">&#9745;</span>
+        <span class="inema-label-todo">Marcar como lido</span>
+        <span class="inema-label-done">Lido</span>
+      </button>
+    </section>
+
+    <!-- TÓPICO 2 -->
+    <section id="topico-2" data-inema-topic="modulo-2-3#topico-2" class="mb-16">
+      <div class="flex items-center space-x-4 mb-6">
+        <span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl">2</span>
+        <h2 class="text-2xl font-bold">🎚️ Escolher o esforço certo para cada tarefa</h2>
+      </div>
+      <p class="text-neutral-300 mb-6 leading-relaxed" data-inema-block="m2-3-p2">Esforço alto ajuda quando o gargalo é raciocínio: um bug que atravessa módulos, uma migração com ordem de operações, uma decisão de arquitetura. Não ajuda quando o gargalo é contexto: se o agente não sabe onde está o arquivo, pensar mais não resolve, ler resolve.</p>
+
+      <div class="overflow-x-auto rounded-xl border border-dark-600 mb-6">
+        <table class="w-full text-sm text-left">
+          <caption class="text-left text-xs text-neutral-500 px-4 pt-3">Regra: comece em medium. Suba para high quando a falha for de raciocínio, não de contexto.</caption>
+          <thead class="bg-dark-800 text-blue-400"><tr><th class="px-4 py-3 font-semibold">Tarefa</th><th class="px-4 py-3 font-semibold">Esforço</th><th class="px-4 py-3 font-semibold">Por quê</th></tr></thead>
+          <tbody class="divide-y divide-dark-600"><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">Trocar valor de configuração</td><td class="px-4 py-3 text-neutral-300">low/medium</td><td class="px-4 py-3 text-neutral-300">Achar e editar; raciocínio não é o gargalo</td></tr><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">Refatorar CSS com critérios</td><td class="px-4 py-3 text-neutral-300">medium</td><td class="px-4 py-3 text-neutral-300">Muitas edições simples, critérios explícitos</td></tr><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">Gerar vídeo com skill</td><td class="px-4 py-3 text-neutral-300">medium</td><td class="px-4 py-3 text-neutral-300">O procedimento está escrito na skill</td></tr><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">Bug intermitente entre módulos</td><td class="px-4 py-3 text-neutral-300">high</td><td class="px-4 py-3 text-neutral-300">Hipóteses concorrentes, precisa raciocinar</td></tr><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">Migração de dados com ordem</td><td class="px-4 py-3 text-neutral-300">high</td><td class="px-4 py-3 text-neutral-300">Erro custa caro, ordem importa</td></tr><tr class="bg-dark-900/40"><td class="px-4 py-3 font-semibold text-neutral-100">Reconhecimento de repo novo</td><td class="px-4 py-3 text-neutral-300">medium</td><td class="px-4 py-3 text-neutral-300">Leitura, não dedução</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="codebox bg-dark-800 rounded-xl border border-blue-500/30 overflow-hidden mb-6">
+        <div class="px-5 py-3 border-b border-dark-600 flex items-start justify-between gap-3 flex-wrap">
+          <div><p class="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-1">Copie e rode</p><p class="text-sm text-neutral-300">Rodar a mesma tarefa em dois níveis e comparar custo e resultado</p></div>
+          <button type="button" data-copy class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors">Copiar</button>
+        </div>
+        <pre class="p-5 text-sm text-neutral-100 bg-dark-900/60 font-mono leading-relaxed"><code class="language-bash"># medium (padrão do config)
+codex exec --skip-git-repo-check "&lt;TAREFA&gt;" &gt; /tmp/saida-medium.txt
+
+# high só nesta chamada
+codex exec --skip-git-repo-check -c model_reasoning_effort="high" "&lt;TAREFA&gt;" &gt; /tmp/saida-high.txt
+
+diff /tmp/saida-medium.txt /tmp/saida-high.txt | head -40</code></pre>
+        <div class="px-5 py-3 border-t border-dark-600 text-sm text-neutral-400"><strong class="text-neutral-300">Como verificar:</strong> Se o diff é irrelevante para o seu objetivo, essa família de tarefas roda em medium para sempre. Anote a conclusão no AGENTS.md do projeto.</div>
+      </div>
+      
+      <button type="button" data-inema-read-toggle class="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors flex items-center space-x-2 justify-start">
+        <span class="inema-ico-todo" aria-hidden="true">&#9744;</span>
+        <span class="inema-ico-done" aria-hidden="true">&#9745;</span>
+        <span class="inema-label-todo">Marcar como lido</span>
+        <span class="inema-label-done">Lido</span>
+      </button>
+    </section>
+
+    <!-- TÓPICO 3 -->
+    <section id="topico-3" data-inema-topic="modulo-2-3#topico-3" class="mb-16">
+      <div class="flex items-center space-x-4 mb-6">
+        <span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl">3</span>
+        <h2 class="text-2xl font-bold">🪜 Orquestração: o caro planeja, o barato executa</h2>
+      </div>
+      <p class="text-neutral-300 mb-6 leading-relaxed" data-inema-block="m2-3-p3">O padrão: o modelo forte lê o problema e produz um plano detalhado, com passos, critérios e comandos. Esse plano vira um arquivo. Um modelo mais barato (local ou API econômica) executa passo a passo, e o forte só volta para revisar o resultado ou destravar. O forte aparece duas vezes; o barato, vinte.</p>
+
+      <figure class="rounded-2xl border border-blue-500/30 bg-dark-900/40 p-3 sm:p-4 mb-6 overflow-hidden">
+        <svg viewBox="0 0 800 328" class="w-full h-auto" role="img" aria-label="Orquestração: o modelo de fronteira produz um plano que se ramifica em muitas execuções feitas por modelos mais baratos"><defs>
+    <linearGradient id="s18-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#60a5fa"/><stop offset="1" stop-color="#3b82f6"/></linearGradient>
+    <filter id="s18-glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="1.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <pattern id="s18-grid" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="1.3" cy="1.3" r="1.3" fill="#3b82f6" opacity="0.14"/></pattern>
+  </defs><rect width="800" height="328" fill="url(#s18-grid)"/>
+      <g filter="url(#s18-glow)"><circle cx="130" cy="164" r="88" fill="#1e3a8a" stroke="url(#s18-g)" stroke-width="2.5"/></g>
+      <text x="130" y="156" text-anchor="middle" fill="#60a5fa" font-family="Inter,sans-serif" font-size="15" font-weight="800">Astra</text><text x="130" y="174" text-anchor="middle" fill="#60a5fa" font-family="Inter,sans-serif" font-size="15" font-weight="800">planeja e</text><text x="130" y="192" text-anchor="middle" fill="#60a5fa" font-family="Inter,sans-serif" font-size="15" font-weight="800">revisa</text><path d="M220 164 C 255 164, 255 56, 380 56" fill="none" stroke="#3b82f6" stroke-width="1.6" stroke-dasharray="5 5" opacity="0.6"/>
+        <g class="wf-a"><rect x="380" y="32" width="400" height="48" rx="10" fill="#1e3a8a" stroke="#3b82f6" stroke-width="1.6"/>
+        <text x="420" y="62" text-anchor="middle" fill="#60a5fa" font-family="Inter,sans-serif" font-size="18" font-weight="800">+1</text>
+        <text x="454" y="53" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="11.5" font-weight="600">Plano em arquivo</text>
+        <text x="454" y="69" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5">passos, critérios, comandos</text></g><path d="M220 164 C 255 164, 255 128, 380 128" fill="none" stroke="#38bdf8" stroke-width="1.6" stroke-dasharray="5 5" opacity="0.6"/>
+        <g class="wf-a"><rect x="380" y="104" width="400" height="48" rx="10" fill="#0e1b26" stroke="#38bdf8" stroke-width="1.6"/>
+        <text x="420" y="134" text-anchor="middle" fill="#38bdf8" font-family="Inter,sans-serif" font-size="18" font-weight="800">+8</text>
+        <text x="454" y="125" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="11.5" font-weight="600">Execuções repetitivas</text>
+        <text x="454" y="141" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5">modelo local ou API barata</text></g><path d="M220 164 C 255 164, 255 200, 380 200" fill="none" stroke="#3b82f6" stroke-width="1.6" stroke-dasharray="5 5" opacity="0.6"/>
+        <g class="wf-a"><rect x="380" y="176" width="400" height="48" rx="10" fill="#1e3a8a" stroke="#3b82f6" stroke-width="1.6"/>
+        <text x="420" y="206" text-anchor="middle" fill="#60a5fa" font-family="Inter,sans-serif" font-size="18" font-weight="800">+1</text>
+        <text x="454" y="197" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="11.5" font-weight="600">Revisão final</text>
+        <text x="454" y="213" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5">volta ao modelo forte</text></g><path d="M220 164 C 255 164, 255 272, 380 272" fill="none" stroke="#38bdf8" stroke-width="1.6" stroke-dasharray="5 5" opacity="0.6"/>
+        <g class="wf-a"><rect x="380" y="248" width="400" height="48" rx="10" fill="#0e1b26" stroke="#38bdf8" stroke-width="1.6"/>
+        <text x="420" y="278" text-anchor="middle" fill="#38bdf8" font-family="Inter,sans-serif" font-size="18" font-weight="800">+1</text>
+        <text x="454" y="269" fill="#e5e7eb" font-family="Inter,sans-serif" font-size="11.5" font-weight="600">Destravamento</text>
+        <text x="454" y="285" fill="#9ca3af" font-family="Inter,sans-serif" font-size="9.5">só quando o barato empaca</text></g></svg>
+        <figcaption class="text-xs text-neutral-400 mt-3 px-1"><strong class="text-blue-400">O que olhar:</strong> Dez unidades de trabalho, duas passagens pelo modelo caro. É a mesma lógica de mapear um site uma vez e rodar a ferramenta muitas.</figcaption>
+      </figure>
+
+      <div class="codebox bg-dark-800 rounded-xl border border-blue-500/30 overflow-hidden mb-6">
+        <div class="px-5 py-3 border-b border-dark-600 flex items-start justify-between gap-3 flex-wrap">
+          <div><p class="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-1">Copie e rode</p><p class="text-sm text-neutral-300">Passo 1: pedir ao modelo forte um plano executável por um modelo mais fraco</p></div>
+          <button type="button" data-copy class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors">Copiar</button>
+        </div>
+        <pre class="p-5 text-sm text-neutral-100 bg-dark-900/60 font-mono leading-relaxed"><code class="language-text">Produza um plano de execução para: &lt;OBJETIVO&gt;.
+
+O plano será executado por um modelo mais fraco, que não tem o seu contexto. Portanto:
+- cada passo deve ser autocontido (caminhos completos, comandos exatos);
+- cada passo tem um critério de aceite verificável por comando;
+- nenhum passo pode exigir julgamento estético ou decisão de arquitetura: essas decisões você toma agora e escreve como regra;
+- liste no fim os pontos em que o executor deve parar e me chamar.
+
+Salve em ./PLANO.md. Não execute nada.</code></pre>
+        <div class="px-5 py-3 border-t border-dark-600 text-sm text-neutral-400"><strong class="text-neutral-300">Como verificar:</strong> Leia PLANO.md: cada passo tem comando e critério. Passo com "ajuste conforme necessário" é passo que o modelo fraco vai errar; peça reescrita desse passo.</div>
+      </div>
+
+      <div class="codebox bg-dark-800 rounded-xl border border-blue-500/30 overflow-hidden mb-6">
+        <div class="px-5 py-3 border-b border-dark-600 flex items-start justify-between gap-3 flex-wrap">
+          <div><p class="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-1">Copie e rode</p><p class="text-sm text-neutral-300">Passo 2: executar o plano com um modelo mais barato, um passo por vez</p></div>
+          <button type="button" data-copy class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors">Copiar</button>
+        </div>
+        <pre class="p-5 text-sm text-neutral-100 bg-dark-900/60 font-mono leading-relaxed"><code class="language-bash"># exemplo com modelo local via CLI (ajuste ao seu provedor)
+codex exec --oss -m &lt;MODELO_LOCAL&gt; --skip-git-repo-check \
+  "Leia ./PLANO.md. Execute APENAS o passo &lt;N&gt;. Ao terminar, rode o critério de aceite do passo e cole a saída. Não avance para o próximo passo."
+
+# revisão final volta ao modelo forte
+codex exec -m gpt-6-astra --skip-git-repo-check \
+  "Revise o resultado da execução de ./PLANO.md: git diff --stat, e diga quais critérios de aceite não foram cumpridos."</code></pre>
+        <div class="px-5 py-3 border-t border-dark-600 text-sm text-neutral-400"><strong class="text-neutral-300">Como verificar:</strong> O passo executado tem a saída do critério colada. A revisão final aponta divergências específicas, não um "está tudo certo".</div>
+      </div>
+
+      <div class="bg-primary/10 rounded-xl border border-primary/30 p-6 mb-6">
+        <h3 class="text-lg font-semibold text-primary mb-3 flex items-center"><span class="mr-2">💡</span> O plano é o produto</h3>
+        <p class="text-neutral-300" data-inema-block="m2-3-p4">Se o plano está bom, o executor barato funciona. Se o executor erra sempre no mesmo passo, o defeito está no plano, não no modelo. Corrija o arquivo.</p>
+      </div>
+      
+      <button type="button" data-inema-read-toggle class="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors flex items-center space-x-2 justify-start">
+        <span class="inema-ico-todo" aria-hidden="true">&#9744;</span>
+        <span class="inema-ico-done" aria-hidden="true">&#9745;</span>
+        <span class="inema-label-todo">Marcar como lido</span>
+        <span class="inema-label-done">Lido</span>
+      </button>
+    </section>
+
+    <!-- TÓPICO 4 -->
+    <section id="topico-4" data-inema-topic="modulo-2-3#topico-4" class="mb-16">
+      <div class="flex items-center space-x-4 mb-6">
+        <span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl">4</span>
+        <h2 class="text-2xl font-bold">🤖 Ligar o Astra aos seus agentes sem chave de API</h2>
+      </div>
+      <p class="text-neutral-300 mb-6 leading-relaxed" data-inema-block="m2-3-p5">Um agente local configurado para usar o provedor do Codex aproveita a sessão autenticada da assinatura. O ganho é direto: modelo de fronteira nos seus agentes sem chave separada. O custo é que tudo passa a consumir a mesma cota: sessões do Codex, seus agentes e qualquer automação.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div class="bg-blue-900/20 rounded-xl border border-blue-500/30 p-6">
+          <h4 class="font-bold text-blue-400 mb-4">&#10003; Bom uso da cota compartilhada</h4>
+          <ul class="space-y-3 text-neutral-300"><li class="flex items-start space-x-2"><span class="text-blue-400">&#10003;</span><span>Um agente pessoal que você usa sozinho</span></li><li class="flex items-start space-x-2"><span class="text-blue-400">&#10003;</span><span>Automações pontuais, sob demanda</span></li><li class="flex items-start space-x-2"><span class="text-blue-400">&#10003;</span><span>Planejamento e revisão (poucas chamadas caras)</span></li><li class="flex items-start space-x-2"><span class="text-blue-400">&#10003;</span><span>Prototipar antes de decidir se vale API</span></li></ul>
+        </div>
+        <div class="bg-red-900/20 rounded-xl border border-red-500/30 p-6">
+          <h4 class="font-bold text-red-400 mb-4">&#10007; Mau uso</h4>
+          <ul class="space-y-3 text-neutral-300"><li class="flex items-start space-x-2"><span class="text-red-400">&#10007;</span><span>Serviço com muitos usuários simultâneos</span></li><li class="flex items-start space-x-2"><span class="text-red-400">&#10007;</span><span>Laço automático sem teto de chamadas</span></li><li class="flex items-start space-x-2"><span class="text-red-400">&#10007;</span><span>Executor de volume (isso é trabalho do modelo barato)</span></li><li class="flex items-start space-x-2"><span class="text-red-400">&#10007;</span><span>Produção com necessidade de disponibilidade garantida</span></li></ul>
+        </div>
+      </div>
+
+      <div class="bg-red-900/20 rounded-xl border border-red-500/30 p-6 mb-6">
+        <h3 class="text-lg font-semibold text-red-400 mb-3 flex items-center"><span class="mr-2">⚠️</span> Automação sem teto zera a cota dormindo</h3>
+        <p class="text-neutral-300" data-inema-block="m2-3-p6">Antes de ligar qualquer laço automático ao provedor da assinatura, coloque um teto: número máximo de chamadas por execução e por dia. Um laço com erro roda a noite inteira.</p>
+      </div>
+
+      <div class="codebox bg-dark-800 rounded-xl border border-blue-500/30 overflow-hidden mb-6">
+        <div class="px-5 py-3 border-b border-dark-600 flex items-start justify-between gap-3 flex-wrap">
+          <div><p class="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-1">Copie e rode</p><p class="text-sm text-neutral-300">Teto simples para um laço automático que chama o agente</p></div>
+          <button type="button" data-copy class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors">Copiar</button>
+        </div>
+        <pre class="p-5 text-sm text-neutral-100 bg-dark-900/60 font-mono leading-relaxed"><code class="language-bash">MAX=20
+for i in $(seq 1 $MAX); do
+  codex exec --skip-git-repo-check "&lt;TAREFA_DO_ITEM $i&gt;" || break
+done
+echo "encerrado após no máximo $MAX chamadas"</code></pre>
+        <div class="px-5 py-3 border-t border-dark-600 text-sm text-neutral-400"><strong class="text-neutral-300">Como verificar:</strong> Rode com MAX=2 primeiro e confira o consumo antes e depois no medidor. Só então aumente.</div>
+      </div>
+      
+      <button type="button" data-inema-read-toggle class="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors flex items-center space-x-2 justify-start">
+        <span class="inema-ico-todo" aria-hidden="true">&#9744;</span>
+        <span class="inema-ico-done" aria-hidden="true">&#9745;</span>
+        <span class="inema-label-todo">Marcar como lido</span>
+        <span class="inema-label-done">Lido</span>
+      </button>
+    </section>
+
+    <!-- TÓPICO 5 -->
+    <section id="topico-5" data-inema-topic="modulo-2-3#topico-5" class="mb-16">
+      <div class="flex items-center space-x-4 mb-6">
+        <span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl">5</span>
+        <h2 class="text-2xl font-bold">⏱️ Reduzir custo sem reduzir trabalho</h2>
+      </div>
+      
+      <div class="space-y-5 mb-6">
+        <h3 class="text-lg font-semibold text-blue-400 mb-2">Os cinco ajustes, em ordem de impacto</h3>
+        
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center"><span class="text-blue-400 font-bold">1</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Salve o reconhecimento do repositório</h4>
+            <p class="text-sm text-neutral-400 mb-2">maior economia isolada</p>
+            <p class="text-neutral-300 text-sm" data-inema-block="m2-3-p7">O mapa do projeto (módulo 1.4) vai para um arquivo no repo. Sessões novas leem o arquivo em vez de reler o código inteiro.</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center"><span class="text-blue-400 font-bold">2</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Feche o escopo em toda tarefa</h4>
+            <p class="text-sm text-neutral-400 mb-2">evita trabalho não pedido</p>
+            <p class="text-neutral-300 text-sm" data-inema-block="m2-3-p8">A lista de arquivos permitidos impede o agente de "aproveitar e arrumar" outras coisas, que custa tokens e revisão.</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center"><span class="text-blue-400 font-bold">3</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Computer use só onde não há alternativa</h4>
+            <p class="text-sm text-neutral-400 mb-2">o mais caro por minuto</p>
+            <p class="text-neutral-300 text-sm" data-inema-block="m2-3-p9">Se existe comando, API ou MCP, use. Captura de tela a cada passo é o item mais caro do curso.</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center"><span class="text-blue-400 font-bold">4</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Vire ferramenta o que se repete</h4>
+            <p class="text-sm text-neutral-400 mb-2">custo único contra recorrente</p>
+            <p class="text-neutral-300 text-sm" data-inema-block="m2-3-p10">Terceira repetição da mesma tarefa: peça uma linha de comando e rode com modelo barato daí em diante.</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center"><span class="text-blue-400 font-bold">5</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Esforço medium por padrão</h4>
+            <p class="text-sm text-neutral-400 mb-2">ajuste fino</p>
+            <p class="text-neutral-300 text-sm" data-inema-block="m2-3-p11">high só quando a falha é de raciocínio. Anote no AGENTS.md quais famílias de tarefa precisam.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="codebox bg-dark-800 rounded-xl border border-blue-500/30 overflow-hidden mb-6">
+        <div class="px-5 py-3 border-b border-dark-600 flex items-start justify-between gap-3 flex-wrap">
+          <div><p class="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-1">Copie e rode</p><p class="text-sm text-neutral-300">Salvar o reconhecimento do repositório para reaproveitar em toda sessão</p></div>
+          <button type="button" data-copy class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors">Copiar</button>
+        </div>
+        <pre class="p-5 text-sm text-neutral-100 bg-dark-900/60 font-mono leading-relaxed"><code class="language-text">Escreva ./MAPA.md com o reconhecimento deste repositório:
+- stack e comandos (subir, testar, build), exatos;
+- estrutura de pastas com uma linha por pasta relevante;
+- onde ficam configurações sensíveis (modelo, credenciais, endpoints) com arquivo:linha;
+- os 5 arquivos mais arriscados e por quê;
+- decisões de arquitetura que não são óbvias pelo código.
+
+Depois adicione ao AGENTS.md a linha: "Leia MAPA.md antes de qualquer tarefa neste repositório."</code></pre>
+        <div class="px-5 py-3 border-t border-dark-600 text-sm text-neutral-400"><strong class="text-neutral-300">Como verificar:</strong> Sessão nova: peça "qual o comando para rodar os testes aqui?" e veja se responde sem reler o projeto. Atualize MAPA.md quando a estrutura mudar.</div>
+      </div>
+      
+      <button type="button" data-inema-read-toggle class="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors flex items-center space-x-2 justify-start">
+        <span class="inema-ico-todo" aria-hidden="true">&#9744;</span>
+        <span class="inema-ico-done" aria-hidden="true">&#9745;</span>
+        <span class="inema-label-todo">Marcar como lido</span>
+        <span class="inema-label-done">Lido</span>
+      </button>
+    </section>
+
+    <!-- TÓPICO 6 -->
+    <section id="topico-6" data-inema-topic="modulo-2-3#topico-6" class="mb-16">
+      <div class="flex items-center space-x-4 mb-6">
+        <span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xl">6</span>
+        <h2 class="text-2xl font-bold">🧪 Prática: medir, planejar, orquestrar</h2>
+      </div>
+      
+      <div class="space-y-5 mb-6">
+        <h3 class="text-lg font-semibold text-blue-400 mb-2">Roteiro (40 min)</h3>
+        
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center"><span class="text-blue-400 font-bold">1</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Escolha uma tarefa repetitiva real</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m2-3-p12">Algo com dez ou mais passos parecidos: renomear em vários arquivos, gerar variações, aplicar um padrão.</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center"><span class="text-blue-400 font-bold">2</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Meça o baseline</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m2-3-p13">Anote o percentual da cota, rode tudo no modelo forte, anote de novo. Guarde o resultado.</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center"><span class="text-blue-400 font-bold">3</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Rollback</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m2-3-p14">git checkout para voltar ao estado inicial.</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center"><span class="text-blue-400 font-bold">4</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Plano</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m2-3-p15">Peça o PLANO.md ao modelo forte. Leia e corrija os passos vagos.</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center"><span class="text-blue-400 font-bold">5</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Execução barata</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m2-3-p16">Rode os passos com o modelo mais barato que você tem, um por vez.</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center"><span class="text-blue-400 font-bold">6</span></div>
+          <div class="flex-1 bg-dark-800 rounded-xl p-6 border border-dark-600">
+            <h4 class="font-semibold text-white mb-2">Compare</h4>
+            
+            <p class="text-neutral-300 text-sm" data-inema-block="m2-3-p17">Consumo de cota e qualidade do resultado, lado a lado. Decida qual família de tarefa vira orquestrada.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="codebox bg-dark-800 rounded-xl border border-blue-500/30 overflow-hidden mb-6">
+        <div class="px-5 py-3 border-b border-dark-600 flex items-start justify-between gap-3 flex-wrap">
+          <div><p class="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-1">Copie e rode</p><p class="text-sm text-neutral-300">Comparar os dois resultados de forma objetiva</p></div>
+          <button type="button" data-copy class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors">Copiar</button>
+        </div>
+        <pre class="p-5 text-sm text-neutral-100 bg-dark-900/60 font-mono leading-relaxed"><code class="language-bash"># guarde os dois estados em branches
+git checkout -b baseline-forte &amp;&amp; git add -A &amp;&amp; git commit -m "tudo no modelo forte"
+git checkout main &amp;&amp; git checkout -- .
+# ...depois da execução orquestrada:
+git checkout -b orquestrado &amp;&amp; git add -A &amp;&amp; git commit -m "plano + executor barato"
+git diff baseline-forte orquestrado --stat</code></pre>
+        <div class="px-5 py-3 border-t border-dark-600 text-sm text-neutral-400"><strong class="text-neutral-300">Como verificar:</strong> O diff entre as duas branches mostra se o resultado é equivalente. Diferença pequena e cota bem menor significa que essa família de tarefa deve ser orquestrada sempre.</div>
+      </div>
+      
+      <button type="button" data-inema-read-toggle class="mt-4 px-4 py-2 rounded-lg text-sm font-medium bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors flex items-center space-x-2 justify-start">
+        <span class="inema-ico-todo" aria-hidden="true">&#9744;</span>
+        <span class="inema-ico-done" aria-hidden="true">&#9745;</span>
+        <span class="inema-label-todo">Marcar como lido</span>
+        <span class="inema-label-done">Lido</span>
+      </button>
+    </section>
+
+    <!-- QUIZ -->
+    
+      <div class="bg-dark-800 rounded-2xl border border-blue-500/30 p-6 mb-6">
+        <h3 class="text-lg font-semibold text-blue-400 mb-1 flex items-center"><span class="mr-2">🧪</span> Teste rápido do módulo</h3>
+        <p class="text-sm text-neutral-400 mb-5">Três perguntas. Clique numa opção para ver a resposta.</p>
+        <div class="space-y-5">
+        
+          <div class="qz" data-q="1">
+            <p class="font-semibold text-neutral-100 mb-3">1. Qual atividade consome mais cota por minuto?</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-blue-500/40 transition-colors" data-ok="0">Edição de texto</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-blue-500/40 transition-colors" data-ok="1">Computer use com captura de tela a cada passo</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-blue-500/40 transition-colors" data-ok="0">Leitura de um arquivo</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-blue-500/40 transition-colors" data-ok="0">Rodar testes</button>
+            </div>
+            <p class="qz-fb mt-3 text-sm text-neutral-300" data-text="Cada passo carrega uma imagem da tela para o modelo."></p>
+          </div>
+          <div class="qz" data-q="2">
+            <p class="font-semibold text-neutral-100 mb-3">2. Quando subir o esforço de raciocínio para high?</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-blue-500/40 transition-colors" data-ok="0">Sempre, por segurança</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-blue-500/40 transition-colors" data-ok="1">Quando a falha é de raciocínio, não de contexto</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-blue-500/40 transition-colors" data-ok="0">Quando a tarefa é longa</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-blue-500/40 transition-colors" data-ok="0">Quando a cota está cheia</button>
+            </div>
+            <p class="qz-fb mt-3 text-sm text-neutral-300" data-text="Se o agente não sabe onde está o arquivo, pensar mais não resolve; ler resolve."></p>
+          </div>
+          <div class="qz" data-q="3">
+            <p class="font-semibold text-neutral-100 mb-3">3. No padrão de orquestração, o modelo de fronteira aparece:</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-blue-500/40 transition-colors" data-ok="0">Em todos os passos</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-blue-500/40 transition-colors" data-ok="1">Só no plano e na revisão</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-blue-500/40 transition-colors" data-ok="0">Nunca</button><button type="button" class="qz-opt text-left px-4 py-3 rounded-lg border border-dark-600 bg-dark-900/40 text-sm text-neutral-300 hover:border-blue-500/40 transition-colors" data-ok="0">Só quando o barato falha</button>
+            </div>
+            <p class="qz-fb mt-3 text-sm text-neutral-300" data-text="Ele planeja e revisa; o volume de execução vai para o modelo barato, com destravamento pontual."></p>
+          </div>
+        </div>
+      </div>
+
+    <!-- RESUMO DO MÓDULO -->
+    <section class="mb-12">
+      <div class="bg-gradient-to-br from-blue-900/40 via-dark-800 to-dark-800 rounded-xl border border-blue-500/30 p-8">
+        <h2 class="text-2xl font-bold mb-6 flex items-center"><span class="mr-3">📋</span> Resumo do módulo</h2>
+        <div class="space-y-4 mb-8">
+          <div class="flex items-start space-x-3"><span class="text-blue-400 mt-1">&#10003;</span><div><strong class="text-white">Leia a taxa, não o número</strong><span class="text-neutral-400"> - dois pares de leitura dão a autonomia restante em minutos.</span></div></div><div class="flex items-start space-x-3"><span class="text-blue-400 mt-1">&#10003;</span><div><strong class="text-white">medium por padrão</strong><span class="text-neutral-400"> - high só quando o gargalo é raciocínio; meça com o mesmo prompt nos dois.</span></div></div><div class="flex items-start space-x-3"><span class="text-blue-400 mt-1">&#10003;</span><div><strong class="text-white">Orquestrar</strong><span class="text-neutral-400"> - o forte produz PLANO.md autocontido; o barato executa passo a passo.</span></div></div><div class="flex items-start space-x-3"><span class="text-blue-400 mt-1">&#10003;</span><div><strong class="text-white">Cota compartilhada</strong><span class="text-neutral-400"> - agentes próprios via assinatura precisam de teto de chamadas.</span></div></div><div class="flex items-start space-x-3"><span class="text-blue-400 mt-1">&#10003;</span><div><strong class="text-white">Economia real</strong><span class="text-neutral-400"> - reconhecimento salvo, escopo fechado, ferramenta em vez de repetição.</span></div></div>
+        </div>
+        <div class="bg-dark-800/50 rounded-lg p-4 mb-8"><h3 class="font-semibold text-blue-400 mb-2">Próximo módulo:</h3><p class="text-neutral-300">2.4 - Memória compartilhada e o sistema completo</p></div>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a href="modulo-2-2.html" class="flex-1 text-center px-6 py-3 bg-dark-700 text-neutral-300 rounded-lg font-semibold hover:bg-dark-600 transition-colors">&#8592; Módulo 2.2</a>
+          <a href="modulo-2-4.html" class="flex-1 text-center px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-500 transition-colors">Próximo módulo &#8594;</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-dark-600 mt-16 py-8">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-neutral-500 text-sm space-y-2">
+      <p>GPT-6 Astra: operação técnica · Trilha 2 — Construir e escalar · 2026 ·
+        <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300">INEMA.CLUB</a> -
+        <a href="https://inema.pro" target="_blank" class="text-amber-700 dark:text-slate-300">PRO</a></p>
+      <p class="text-xs">Fontes: <a href="https://openai.com/index/gpt-6-astra/" target="_blank" class="text-sky-400 hover:text-sky-300">página de lançamento do GPT-6 Astra</a> (OpenAI) · <a href="https://developers.openai.com/codex/" target="_blank" class="text-sky-400 hover:text-sky-300">documentação do Codex</a> · <a href="https://www.remotion.dev/" target="_blank" class="text-sky-400 hover:text-sky-300">Remotion</a> · <a href="https://github.com/ahujasid/blender-mcp" target="_blank" class="text-sky-400 hover:text-sky-300">Blender MCP</a> · <a href="https://obsidian.md/" target="_blank" class="text-sky-400 hover:text-sky-300">Obsidian</a>. Comandos conferidos no Codex CLI 0.153 (set/2026). Versão leiga deste conteúdo: <a href="https://inematds.github.io/gpt6-astra/" target="_blank" class="text-sky-400 hover:text-sky-300">GPT-6 Astra na prática</a>.</p>
+    </div>
+  </footer>
+
+  <!-- SCRIPTS núcleo v1 -->
+  <script>
+    function toggleTopic(button) {
+      const topicItem = button.closest('.topic-item');
+      const explanation = topicItem.querySelector('.topic-explanation');
+      const moduleCard = button.closest('.bg-dark-800');
+      if (moduleCard) {
+        moduleCard.querySelectorAll('.topic-explanation.active').forEach(exp => {
+          if (exp !== explanation) { exp.classList.remove('active'); const b = exp.parentElement.querySelector('[aria-controls="' + exp.id + '"]'); if (b) b.setAttribute('aria-expanded', 'false'); }
+        });
+      }
+      const isOpen = explanation.classList.toggle('active');
+      button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    }
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+    const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+    const html = document.documentElement;
+    if (!html.classList.contains('dark')) { themeToggleDarkIcon.classList.remove('hidden'); } else { themeToggleLightIcon.classList.remove('hidden'); }
+    themeToggle.addEventListener('click', () => {
+      themeToggleDarkIcon.classList.toggle('hidden');
+      themeToggleLightIcon.classList.toggle('hidden');
+      html.classList.toggle('dark');
+      const dark = html.classList.contains('dark');
+      localStorage.setItem('theme', dark ? 'dark' : 'light');
+      if (window.INEMA && INEMA.setPref) { try { INEMA.setPref('theme', dark ? 'inema-dark' : 'claro'); } catch (e) {} }
+    });
+    function openModal(modalId) { const m = document.getElementById(modalId); if (m) { m.classList.remove('hidden'); document.body.style.overflow = 'hidden'; } }
+    function closeModal() { document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden')); document.body.style.overflow = 'auto'; }
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+    // Quiz inline (3 perguntas por módulo)
+    document.addEventListener('click', (e) => {
+      const opt = e.target.closest('.qz-opt'); if (!opt) return;
+      const qz = opt.closest('.qz'); if (!qz || qz.hasAttribute('data-answered')) return;
+      const ok = opt.getAttribute('data-ok') === '1';
+      qz.querySelectorAll('.qz-opt').forEach(o => { o.setAttribute('data-state', o.getAttribute('data-ok') === '1' ? 'ok' : (o === opt ? 'no' : '')); o.disabled = true; });
+      qz.setAttribute('data-answered', ok ? 'ok' : 'no');
+      const fb = qz.querySelector('.qz-fb'); if (fb) fb.textContent = (ok ? '✓ Certo. ' : '✗ Não é essa. ') + (fb.getAttribute('data-text') || '');
+    });
+    // Copiar código
+    document.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-copy]'); if (!b) return;
+      const pre = b.closest('.codebox').querySelector('pre');
+      navigator.clipboard && navigator.clipboard.writeText(pre.innerText).then(() => { const t = b.textContent; b.textContent = 'Copiado ✓'; setTimeout(() => b.textContent = t, 1600); });
+    });
+  </script>
+
+  <script src="../../assets/learn.js"></script>
+  <script>
+    if (window.INEMA && typeof window.INEMA.init === 'function') { window.INEMA.init(); }
+  </script>
+</body>
+</html>
