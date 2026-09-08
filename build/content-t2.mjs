@@ -208,6 +208,7 @@ const M22 = {
           { title: 'Retorno', sub: 'dados, não prosa' },
           { title: 'Agente corrige', sub: 'próxima chamada' },
         ] }), 'O laço fecha a cada chamada. É por isso que uma tarefa de 45 minutos com MCP converge, enquanto um script único de 45 minutos falha no minuto 3 e você só descobre no fim.'),
+        c.tip({ title: 'Antes de escrever um servidor, procure um pronto', text: 'A maioria dos aplicativos populares já tem servidor MCP publicado. Escrever o seu é trabalho de dias; conectar um pronto é um comando. Audite antes de usar, com o mesmo critério de skill de terceiro (módulo 2.1).' }),
         c.grid2(t, { okTitle: 'Caso para MCP', ok: ['Software com API própria (Blender, DAW, CAD)', 'Banco de dados que você consulta muito', 'Serviço interno com muitas operações', 'Qualquer coisa em que o retorno guia o próximo passo'], badTitle: 'Caso para skill ou script', bad: ['Procedimento que só usa arquivos e terminal', 'Tarefa de uma vez só', 'Regra de estilo ou de processo', 'Coisa que a linha de comando já resolve'] }),
       ],
     },
@@ -239,6 +240,7 @@ codex mcp add blender -- uvx blender-mcp
 #    (o servidor fala com o Blender aberto; sem o Blender rodando, as chamadas falham)
 
 codex mcp list`, verify: 'Com o Blender aberto e o complemento ativo, peça "liste os objetos da cena atual do Blender". Uma lista real (mesmo que só o cubo padrão) confirma as duas pontas.' }),
+        c.grid2(t, { okTitle: 'Servidor local (stdio)', ok: ['Aplicativo que roda na sua máquina (Blender, editor, banco local)', 'Precisa de acesso a arquivos ou processos seus', 'Latência mínima, sem rede', 'Você controla a versão do servidor'], badTitle: 'Servidor remoto (--url)', bad: ['Serviço da equipe, compartilhado entre pessoas', 'Exige autenticação e sai da sua máquina', 'Depende de rede: trate queda como caso esperado', 'Não use --env: variáveis só valem para stdio'] }),
         c.table(t, { headers: ['Sintoma', 'Causa', 'Ação'], rows: [
           ['Ferramentas não aparecem', 'Servidor não subiu', '`codex mcp get <nome>` e rode o comando na mão para ver o erro'],
           ['Sobe e cai', 'Dependência ou versão', 'Rode o comando do servidor isolado no terminal; leia o stderr'],
@@ -372,6 +374,7 @@ print(f'restam ~{p1/taxa:.0f} min de trabalho pesado')
           'Tarefas longas com MCP: dezenas de chamadas e retornos no mesmo contexto.',
           'Contexto grande: repositório inteiro lido a cada sessão nova em vez de reconhecimento salvo.',
         ] }),
+        c.tip({ title: 'Meça no seu pior dia, não no melhor', text: 'A taxa de consumo de um dia de leitura e texto engana. Calcule com um dia de computer use e MCP: é esse número que decide se a semana chega ao fim.' }),
         c.figure(t, svg.curve(t, { label: 'Consumo da cota semanal ao longo de uma semana de trabalho, com e sem orquestração', yLabel: '% consumido', xLabels: ['seg', 'ter', 'qua', 'qui', 'sex'], series: [
           { name: 'tudo no modelo de fronteira', values: [25, 50, 72, 90, 100], texts: ['25', '50', '72', '90', 'acabou'] },
           { name: 'com orquestração', values: [12, 24, 34, 44, 55], texts: ['12', '24', '34', '44', '55'] },
@@ -393,6 +396,7 @@ print(f'restam ~{p1/taxa:.0f} min de trabalho pesado')
           ['Migração de dados com ordem', 'high', 'Erro custa caro, ordem importa'],
           ['Reconhecimento de repo novo', 'medium', 'Leitura, não dedução'],
         ], caption: 'Regra: comece em medium. Suba para high quando a falha for de raciocínio, não de contexto.' }),
+        c.grid2(t, { okTitle: 'Sinais de que high vale a pena', ok: ['O agente propôs duas soluções e escolheu a pior', 'A falha se repete com o mesmo raciocínio errado', 'A tarefa exige ordem correta de operações', 'Erro custa caro e é difícil de reverter'], badTitle: 'Sinais de que high é desperdício', bad: ['O agente não achou o arquivo (falta contexto, não raciocínio)', 'O procedimento já está escrito numa skill', 'A tarefa é repetição de um padrão conhecido', 'Você só quer "garantir", sem sintoma nenhum'] }),
         c.code(t, { objective: 'Rodar a mesma tarefa em dois níveis e comparar custo e resultado', lang: 'bash', code: `# medium (padrão do config)
 codex exec --skip-git-repo-check "<TAREFA>" > /tmp/saida-medium.txt
 
@@ -592,6 +596,7 @@ codex --add-dir ~/base "<TAREFA>"
 # opção 2: servidor MCP de sistema de arquivos limitado à base
 codex mcp add base -- <COMANDO_DO_SERVIDOR_DE_ARQUIVOS> ~/base
 codex mcp list`, verify: 'Peça "liste os títulos das notas em ~/base/decisoes". Uma lista real confirma o acesso. Prefira acesso somente leitura quando o agente não precisa escrever.' }),
+        c.grid2(t, { okTitle: 'O agente pode fazer sozinho', ok: ['Buscar e ler qualquer nota da base', 'Citar o arquivo que embasou a resposta', 'Apontar contradição entre nota e pedido atual', 'Redigir a proposta de nota nova'], badTitle: 'Só com a sua aprovação', bad: ['Criar arquivo novo na base', 'Editar ou apagar nota existente', 'Reorganizar pastas e renomear notas', 'Registrar como decisão algo que ainda é hipótese'] }),
         c.tip({ title: 'Propor, não escrever', text: 'Deixe o agente propor a nota e você aprovar. Base escrita automaticamente acumula duplicata e conclusão errada, e a próxima sessão lê isso como verdade.' }),
       ],
     },

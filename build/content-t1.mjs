@@ -48,7 +48,7 @@ const M11 = {
           'Saturar um benchmark significa que ele parou de discriminar modelos, não que o modelo parou de errar.',
         ] }),
         c.figure(t, svg.scale(t, { label: 'Balança: o que o benchmark prova contra o que só a sua verificação prova', tilt: 0, left: { title: 'Benchmark prova', lines: ['capacidade geral', 'custo médio por tarefa', 'comparação entre modelos'] }, right: { title: 'Só você prova', lines: ['funciona no seu repo', 'o resultado é o que pediu', 'nada quebrou fora do escopo'] } }), 'Equilíbrio, não vitória: o benchmark autoriza você a delegar tarefas maiores; ele não substitui a verificação de nenhuma delas.'),
-        c.alert({ title: 'O erro clássico da primeira semana', text: 'Ler "melhor em computer use" e deixar o agente postar, publicar ou pagar sem revisar. Na primeira sessão de teste que serviu de base a este curso, o agente publicou um anúncio com o nome errado do produto. Funcionou; o conteúdo estava errado. Rascunho primeiro, sempre (módulo 1.3).' }),
+        c.alert({ title: 'O erro clássico da primeira semana', text: 'Ler "melhor em computer use" e deixar o agente postar, publicar ou pagar sem revisar. Numa sessão de teste, o agente publicou um anúncio com o nome errado do produto. Funcionou; o conteúdo estava errado. Rascunho primeiro, sempre (módulo 1.3).' }),
       ],
     },
     {
@@ -385,6 +385,7 @@ Se algo pedir login, senha ou pagamento, pare e me avise. Não preencha.`, verif
       body: (t) => [
         c.p('No app, arraste o screenshot para o prompt. No CLI, a flag <code>-i</code> anexa um arquivo de imagem. A extensão também permite referenciar o que está na aba a partir do chat. Toda mudança visual começa com um "antes" anexado e termina com um "depois" que o próprio agente captura.'),
         c.code(t, { objective: 'CLI: pedir uma mudança de UI a partir de um screenshot anexado', lang: 'bash', code: `codex -i ~/Imagens/tela-antes.png "Este é o estado atual da tela principal (screenshot anexo). Deixe o painel de memórias mais legível: mais contraste, agrupamento por data, sem mudar dados nem rotas. Ao terminar, suba o dev server, capture um screenshot da mesma tela em ./tela-depois.png e me dê o caminho."`, verify: 'O arquivo tela-depois.png existe e mostra a mesma tela. Compare lado a lado antes de aceitar; "mais moderno" costuma vir mais escuro e mais vazio (módulo 1.4).' }),
+        c.tip({ title: 'Peça o depois, não tire você mesmo', text: 'Quem captura o "depois" é o agente, com o comando dele. Se você tira o screenshot na mão, a comparação some quando a tarefa é repetida por outra pessoa ou por um script.' }),
         c.grid2(t, { okTitle: 'Referência boa', ok: ['Screenshot inteiro + "o painel marcado em vermelho"', 'URL exata + texto visível do elemento', 'Nome do componente no código, se souber'], badTitle: 'Referência ruim', bad: ['"Aquele botão"', '"A parte de cima"', 'Screenshot recortado sem contexto'] }),
       ],
     },
@@ -529,6 +530,7 @@ Tarefa: <CONTRATO>.`, verify: '`git diff --stat` só lista arquivos da lista. Um
 Onde: esta pasta.
 Prova: \`git diff --stat\`, o trecho de config do perfil novo, e a resposta do perfil a "qual modelo você é?".
 Não faça: não remova perfis existentes, não altere o perfil padrão, não faça commit.`, verify: 'O perfil novo aparece no seletor do seu painel e responde com o nome do modelo. Os perfis antigos continuam lá.' }),
+        c.grid2(t, { okTitle: 'Diff saudável nessa troca', ok: ['Um bloco de perfil novo num arquivo de configuração', 'Referência ao provedor Codex, sem credencial', 'Perfis existentes intactos', 'Nenhuma dependência adicionada'], badTitle: 'Reprove na hora', bad: ['Qualquer string sk-, token ou secret escrita em arquivo', 'Perfil padrão alterado sem você pedir', 'Perfis antigos removidos "para limpar"', 'Novo pacote instalado para "suportar o provedor"'] }),
         c.alert({ title: 'Chave de API em texto no diff', text: 'Se o diff mostra uma chave (sk-..., token, secret) escrita num arquivo, reprove na hora. Perfis via Codex não precisam de chave; se apareceu uma, o agente inventou um caminho. Rollback e "sem chave de API" em maiúsculas no contrato.' }),
       ],
     },
